@@ -1,6 +1,5 @@
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
 
 from kivy.uix.button import Button
 from kivy.uix.slider import Slider
@@ -27,9 +26,11 @@ class ClipButton(ButtonBehavior, BoxLayout):
         print "press clip ", self
 
 
-class RoundButton(ButtonBehavior, FloatLayout):
+class RoundButton(ButtonBehavior, BoxLayout):
     def __init__(self, widget_data, valid_colors, light_color):
         super(RoundButton, self).__init__()
+        #ButtonBehavior.__init__(self)
+        #FloatLayout.__init__(self)
         self.widget_data = widget_data
         self.light_color = light_color
         self.valid_colors = valid_colors
@@ -64,7 +65,7 @@ class SceneButton(RoundButton):
 class ShiftButton(Button):
     def __init__(self, widget_data):
         self.widget_data = widget_data
-        Button.__init__(self)
+        Button.__init__(self, id=str(widget_data.id), text="shift")
 
 
 
@@ -78,14 +79,20 @@ def create_widget(widget_data):
         button_type = widget_data.type
         if button_type == "clip_launch":
             return ClipButton(widget_data)
+            #return ShiftButton(widget_data)
         elif button_type == "scene_launch":
             return SceneButton(widget_data)
+            ##return ShiftButton(widget_data)
         elif button_type == "control":
             return ControlButton(widget_data)
+            ## return ShiftButton(widget_data)
         elif button_type == "shift":
             return ShiftButton(widget_data)
+        else:
+            raise ValueError("Unknown button type", widget_data)
     elif isinstance(widget_data, GridSlider):
         return Slider(id=widget_data.id, min=0, max=127, value=63, orientation='vertical', size_hint=(1. / 9, 8))
         ##         slider.bind(value_normalized=self.handle_slide)
+        return None
     else:
         raise ValueError("Unknown widget type", widget_data)

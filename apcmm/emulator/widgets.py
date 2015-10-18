@@ -22,7 +22,8 @@ class APCMiniWidget(GridLayout):
         self.model = model
         for widget_data in model.grid.values():
             widget = create_widget(widget_data)
-            self.add_widget(widget)
+            if widget:
+                self.add_widget(widget)
 
         ## BOTTOM_LABELS = [[u"▲"], [u"▼"], [u"◀"], [u"▶"], ["volume", "pan", "send", "device"], ["shift"]]
         # self.note_buttons = {}
@@ -49,26 +50,26 @@ class APCMiniWidget(GridLayout):
         # for i, note in enumerate(xrange(48, 57)):
         #     self.add_widget( self.create_slider("slider_%d" % i, note) )
 
-    def create_button(self, id, note):
-        button = MidiButton(note=note, id=id, text="")
-        button.bind(on_press=self.handle_press)
-        button.bind(on_release=self.handle_release)
-        self.note_buttons[note] = button
-        return button
-
-    def create_slider(self, id, controller):
-        slider = Slider(id=id, min=0, max=127, value=63, orientation='vertical', size_hint=(1. / 9, 8))
-        slider.bind(value_normalized=self.handle_slide)
-        self.control_sliders[controller] = slider
-        return slider
-
-    def clear_clip_lights(self):
-        for button in self.note_buttons.values():
-            if button.id.startswith('clip_launch_'):
-                button.state = 'normal'
-
-    def clear_all_lights(self):
-        self.clear_clip_lights()
+    # def create_button(self, id, note):
+    #     button = MidiButton(note=note, id=id, text="")
+    #     button.bind(on_press=self.handle_press)
+    #     button.bind(on_release=self.handle_release)
+    #     self.note_buttons[note] = button
+    #     return button
+    #
+    # def create_slider(self, id, controller):
+    #     slider = Slider(id=id, min=0, max=127, value=63, orientation='vertical', size_hint=(1. / 9, 8))
+    #     slider.bind(value_normalized=self.handle_slide)
+    #     self.control_sliders[controller] = slider
+    #     return slider
+    #
+    # def clear_clip_lights(self):
+    #     for button in self.note_buttons.values():
+    #         if button.id.startswith('clip_launch_'):
+    #             button.state = 'normal'
+    #
+    # def clear_all_lights(self):
+    #     self.clear_clip_lights()
         
 
     # def recv_midi(self, msg):

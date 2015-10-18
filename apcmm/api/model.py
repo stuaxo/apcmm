@@ -38,7 +38,7 @@ APC_BUTTON_EVENTS = [
 class Button:
     # midi notes for each kind of button
     CLIP = range(0, 64)
-    CONTROL = range(64, 72)
+    CONTROL = range(64, 73) ## ???
     SCENE = range(82, 90)
     SHIFT = 98
 
