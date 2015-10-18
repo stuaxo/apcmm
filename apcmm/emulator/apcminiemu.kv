@@ -1,0 +1,49 @@
+<ClipButton>:
+    Image:
+        source: 'clip-button-grey.png'
+
+<SceneButton>:
+    Image:
+        source: 'round-button-grey.png'
+
+<RoundButton>:
+    Image:
+        source: 'round-button-grey.png'
+
+
+<ApcMiniScreen>:
+    FloatLayout:
+        ActionBar:
+            size_hint: 1,0.1
+            pos_hint: {'top':1}
+            ActionView:
+                use_separator: True
+                ActionPrevious:
+                    title: 'Blinkenlights'
+                ActionOverflow:
+                ActionButton:
+                    text: 'Gate'
+                ActionButton:
+                    text: 'Toggle'
+                ActionButton:
+                    text: 'Clear'
+                    id: 'clear_all'
+                    on_press: apc_widget.clear_all_lights()
+                ActionGroup:
+                    text: 'Group1'
+                    #mode: 'spinner'
+                    ActionButton:
+                        text: 'Off'
+                    ActionButton:
+                        text: 'Green'
+                        background: [0, .5, 0]
+                    ActionButton:
+                        text: 'Red'
+                        color: [.5, 0, 0]
+                    ActionButton:
+                        text: 'Yellow'
+                        color: [.5, .5, 0]
+        APCMiniWidget:
+            model: app.virtual_apc
+            id: apc_widget
+            size_hint: 1, 0.9

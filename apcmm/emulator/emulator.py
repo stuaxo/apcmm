@@ -1,6 +1,10 @@
 import logging
+from kivy.uix.screenmanager import Screen, ScreenManager
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+from kivy.config import Config
 
 from os.path import abspath, dirname
 
@@ -12,51 +16,45 @@ from apcmm.api.model import APCMiniModel, ClipColors, ControlColors, SceneColors
 from buttons import ClipButton, ControlButton, SceneButton
 from widgets import APCMiniWidget
 
-TOGGLE = 1
-GATE = 2
+import logging
+logging.getLogger("kivy").disabled = True
 
-__dir__ = dirname(abspath(__file__))
-Builder.load_string("""
-<ClipButton>:
-    Image:
-        source: '{__dir__}/clip-button-grey.png'
+# TOGGLE = 1
+# GATE = 2
+#
+# __dir__ = dirname(abspath(__file__))
+# Builder.load_string("""
+# <ClipButton>:
+#     Image:
+#         source: '{__dir__}/clip-button-grey.png'
+#
+# <SceneButton>:
+#     Image:
+#         source: '{__dir__}/round-button-grey.png'
+#
+# <RoundButton>:
+#     Image:
+#         source: '{__dir__}/round-button-grey.png'
+# """.format(__dir__=__dir__))
 
-<SceneButton>:
-    Image:
-        source: '{__dir__}/round-button-grey.png'
 
-<RoundButton>:
-    Image:
-        source: '{__dir__}/round-button-grey.png'
-""".format(__dir__=__dir__))
+class ApcMiniScreen(Screen):
+    pass
 
 class ApcMiniEmu(App):
     def __init__(self):
+        ApcMiniEmu.virtual_apc = APCMiniModel()  # singleton :/
         App.__init__(self)
-        self.virtual_apc = APCMiniModel()
 
     def build(self):
-        layout = BoxLayout(orientation="vertical")
-
-        apcmw = APCMiniWidget(self.virtual_apc)
-        layout.add_widget(apcmw)
-        # for color in ClipColors:
-        #     layout.add_widget(ClipButton(color.value, color.name))
-        # for i in xrange(5, 8):
-        #     layout.add_widget(ClipButton(i+5))
-        #
-        # #layout.add_widget(SceneButton(SceneColors.green))
-        # layout.add_widget(ControlButton(ControlColors.red))
-
-        #layout.add_widget(SceneButton(SceneColors.grey))
-        #layout.add_widget(ControlButton(ControlColors.grey))
-
-        return layout
-        
+        sm = ScreenManager()
+        sm.add_widget(ApcMiniScreen(name="main_screen"))
+        return sm
 
 def main():
     try:
-        ApcMiniEmu().run()
+        app = ApcMiniEmu()
+        app.run()
     except Exception as e:
         print e
         logger.exception(e)

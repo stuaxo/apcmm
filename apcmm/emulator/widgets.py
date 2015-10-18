@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from kivy.app import App
 
 from kivy.uix.gridlayout import GridLayout
 from apcmm.api.model import GridButton, GridSlider
@@ -11,13 +12,16 @@ class APCMiniWidget(GridLayout):
     buttons are in a dict indexed by note
     sliders are in a dict indexed by control
     """
-    def __init__(self, model, *args, **kwargs):
+    def __init__(self, model=None, *args, **kwargs):
+        if model is None:
+            # TOOD - this is kind of horrible..
+            app = App.get_running_app()
+            model = app.virtual_apc
         GridLayout.__init__(self, cols=9, rows=10)   # chuck all the controls into one grid
 
         self.model = model
         for widget_data in model.grid.values():
             widget = create_widget(widget_data)
-            print "add ", widget
             self.add_widget(widget)
 
         ## BOTTOM_LABELS = [[u"▲"], [u"▼"], [u"◀"], [u"▶"], ["volume", "pan", "send", "device"], ["shift"]]
