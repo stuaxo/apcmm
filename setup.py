@@ -9,7 +9,7 @@ VERSION="0.1.0"
 long_description="""
 apcmm 
 
-Send OSC from the APC Mini or perform other actions.
+API and frontend for APC Mini Ableton controller.
 """
 
 here = normpath(abspath(dirname(__file__)))
@@ -38,7 +38,7 @@ class CleanCommand(Command):
 
 
 setup(
-    name='mnd',
+    name='apcmm',
 
     cmdclass={
         'clean': CleanCommand,
@@ -83,8 +83,13 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='match dispatch',
+    keywords='ableton apcmini apc osc midi',
 
-    packages=["apcmm"],
+    packages=find_packages(),
 
+    entry_points={
+            'console_scripts': [
+                'apcmm = apcmm.emulator:main',
+            ],
+        }
 )
