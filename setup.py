@@ -86,6 +86,7 @@ setup(
     keywords='ableton apcmini apc osc midi',
 
     packages=find_packages(),
+    package_data = {'package' : "images/*.png" },
 
     entry_points={
             'console_scripts': [

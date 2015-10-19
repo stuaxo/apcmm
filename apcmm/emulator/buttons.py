@@ -79,13 +79,10 @@ def create_widget(widget_data):
         button_type = widget_data.type
         if button_type == "clip_launch":
             return ClipButton(widget_data)
-            #return ShiftButton(widget_data)
         elif button_type == "scene_launch":
             return SceneButton(widget_data)
-            ##return ShiftButton(widget_data)
         elif button_type == "control":
             return ControlButton(widget_data)
-            ## return ShiftButton(widget_data)
         elif button_type == "shift":
             return ShiftButton(widget_data)
         else:
