@@ -60,8 +60,34 @@ class ControlColors(Enum):
     grey = 0
     red = 1
 
-GridButton = namedtuple("GridButton", "type name id note x y")
-GridSlider = namedtuple("GridSlider", "id name control x y")
+
+class GridButton(object):
+    def __init__(self, type, id, note, x, y):
+        self.type = type
+        self.id = id
+        self.note = note
+        self.x = x
+        self.y = y
+
+        self.pressed = False
+        self.held = False
+
+    @property
+    def name(self):
+        return "%s_%d" % (self.type, self.id)
+
+
+class GridSlider(object):
+    def __init__(self, type, id, control, x, y):
+        self.type = type
+        self.id = id
+        self.control = control
+        self.x = x
+        self.y = y
+
+    @property
+    def name(self):
+        return "%s_%d" % (self.type, self.id)
 
 CLIP_LAUNCH = "clip_launch"
 SCENE_LAUNCH = "scene_launch"
@@ -96,32 +122,28 @@ class APCMiniModel(with_metaclass(Handler)):
         for row in xrange(7, -1, -1):
             for col in xrange(0, 8):
                 note = (row * 8) + col
-                name = "%s_%d" % (CLIP_LAUNCH, note)
-                btn = GridButton(CLIP_LAUNCH, name, note, note, col, row)
+                btn = GridButton(CLIP_LAUNCH, note, note, col, row)
                 self.clip_buttons.append(btn)
                 self.add_grid_button(btn)
 
             # last column is scene launch
             scene_no, note = next(scenes)
-            name = "%s_%d" % (SCENE_LAUNCH, scene_no)
-            btn = GridButton(SCENE_LAUNCH, name, scene_no, note, 9, note)
+            btn = GridButton(SCENE_LAUNCH, scene_no, note, 9, note)
             self.scene_buttons[note] = btn
             self.add_grid_button(btn)
 
         # row 8 - control buttons and shift
         for i, note in enumerate(Button.CONTROL):
-            name = "%s_%d" % (CONTROL, i)
-            btn = GridButton(CONTROL, name, i, note, i, 8)
+            btn = GridButton(CONTROL, i, note, i, 8)
             self.control_buttons[i] = btn
             self.add_grid_button(btn)
         else:
-            btn = GridButton(SHIFT, SHIFT, 0, Button.SHIFT, i, 8)
+            btn = GridButton(SHIFT, 0, Button.SHIFT, i, 8)
             self.add_grid_button(btn)
 
         # row 9 - sliders
         for i, control in enumerate(Slider.SLIDER):
-            name = "%s_%d" % (SLIDER, i)
-            slider = GridSlider(SLIDER, name, control, i, 9)
+            slider = GridSlider(SLIDER, i, control, i, 9)
             self.control_sliders[i] = slider
             self.add_grid_slider(slider)
 
