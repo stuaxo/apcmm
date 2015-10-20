@@ -3,6 +3,7 @@
 #:import ListItemButton kivy.uix.listview.ListItemButton
 
 #:import la kivy.adapters.listadapter
+#:import APCMiniModel apcmm.api.model.APCMiniModel
 #:import APCMiniWidget apcmm.emulator.widgets.APCMiniWidget
 
 <ClipButton>:
@@ -46,8 +47,8 @@
             on_press: root.dismiss()
             size_hint_y: 0.2
 
-<ApcMiniScreen>:
-    id: apc_screen
+<PerformanceScreen>:
+    id: perform
     FloatLayout:
         ActionBar:
             size_hint: 1,0.1
@@ -55,36 +56,59 @@
             ActionView:
                 use_separator: True
                 ActionPrevious:
-                    title: 'Blinkenlights'
+                    title: 'Perform'
                 ActionOverflow:
                 ActionButton:
                     text: '> %s' % app.midi_port # TODO - load this from config
                     size_hint: 1, 1
-                    on_release: apc_screen.toggle_midi_dropdown(self)
+                    on_release: root.toggle_midi_dropdown(self)
                     id: toggle_midi_popup
                 ActionButton:
-                    text: 'Gate'
+                    text: '[ %s ]' % app.profile_name # TODO - load this from config
+                    size_hint: 1, 1
+                    #on_release: root.toggle_midi_dropdown(self)
+                    id: profile_list
                 ActionButton:
-                    text: 'Toggle'
-                ActionButton:
-                    text: 'Clear'
-                    id: 'clear_all'
-                    on_press: apc_widget.clear_all_lights()
-                ActionGroup:
-                    text: 'Group1'
-                    #mode: 'spinner'
-                    ActionButton:
-                        text: 'Off'
-                    ActionButton:
-                        text: 'Green'
-                        background: [0, .5, 0]
-                    ActionButton:
-                        text: 'Red'
-                        color: [.5, 0, 0]
-                    ActionButton:
-                        text: 'Yellow'
-                        color: [.5, .5, 0]
+                    text: 'Edit'
+                    on_press:
+                        root.manager.transition.direction = 'down'
+                        root.manager.current = 'edit'
         APCMiniWidget:
-            model: app.virtual_apc
+            ## model: root.model
             id: apc_widget
             size_hint: 1, 0.9
+
+
+<EditScreen>:
+    id: edit
+    FloatLayout:
+        ActionBar:
+            size_hint: 1,0.1
+            pos_hint: {'top':1}
+            ActionView:
+                use_separator: True
+                ActionPrevious:
+                    title: 'Edit Profile %s' % app.profile_name
+                    on_press:
+                        root.manager.transition.direction = 'up'
+                        root.manager.current = 'perform'
+                ActionOverflow:
+                ActionButton:
+                    text: '[ %s ]' % app.profile_name # TODO - load this from config
+                    size_hint: 1, 1
+                    #on_release: root.toggle_midi_dropdown(self)
+                    id: profile_list
+                ActionToggleButton:
+                    text: 'press'
+                    group: 'map_to'
+                ActionToggleButton:
+                    text: 'hold'
+                    group: 'map_to'
+                ActionToggleButton:
+                    text: 'release'
+                    group: 'map_to'
+                ActionButton:
+                    text: 'Save'
+        APCMiniWidget:
+            id: mapping
+            size_hint: 0.5, 0.45

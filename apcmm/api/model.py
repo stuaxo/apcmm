@@ -158,6 +158,7 @@ class APCMiniModel(with_metaclass(Handler)):
         self.clip_buttons = []                # indexed by scene no / note
         self.control_buttons = OrderedDict()  # indexed by control no
         self.scene_buttons = OrderedDict()    # indexed by scene no
+
         self.shift_button = None              # the shift button
         self.grid = OrderedDict()             # indexed by (x, y)
         
