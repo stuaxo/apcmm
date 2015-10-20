@@ -13,11 +13,11 @@ class ClipButton(ButtonBehavior, BoxLayout):
         self.data = data
         super(ClipButton, self).__init__()
 
-    def change_color(self, color):
+    def set_color(self, color):
         """
         :param color: one of the values of the ClipColor enum
         """
-        self.children[0].source = 'clip-button-%s.png' % color
+        self.children[0].source = 'images/clip-button-%s.png' % color
 
     def on_press(self):
         print "press clip ", self

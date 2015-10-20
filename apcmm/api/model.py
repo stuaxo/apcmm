@@ -155,14 +155,14 @@ class APCMiniModel(with_metaclass(Handler)):
         # setup dicts of the widgets in the grid
         # so it's easy to retrieve them later 
 
-        self.clip_buttons = []
-        self.control_buttons = OrderedDict()
-        self.scene_buttons = OrderedDict()
-        self.shift_button = OrderedDict()
-        self.grid = OrderedDict()
+        self.clip_buttons = []                # indexed by scene no / note
+        self.control_buttons = OrderedDict()  # indexed by control no
+        self.scene_buttons = OrderedDict()    # indexed by scene no
+        self.shift_button = None              # the shift button
+        self.grid = OrderedDict()             # indexed by (x, y)
         
-        self.note_buttons = OrderedDict()
-        self.control_sliders = OrderedDict()
+        self.note_buttons = OrderedDict()     # indexed by note
+        self.control_sliders = OrderedDict()  # indexed by control id
 
         # TODO - find out about control buttons
 
@@ -190,6 +190,7 @@ class APCMiniModel(with_metaclass(Handler)):
         else:
             btn = GridButton(SHIFT, 0, Button.SHIFT, n, 8)
             self.add_grid_button(btn)
+            self.shift_button = None
 
         # row 9 - sliders
         for n, control in enumerate(Slider.SLIDER):
