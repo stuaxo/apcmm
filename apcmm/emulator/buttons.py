@@ -4,11 +4,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.slider import Slider
 
-from apcmm.api.model import ClipColors, ControlColors, SceneColors, GridButton, GridSlider
+from apcmm.api.model import ClipColors, ControlColors, SceneColors, GridButton, GridSlider, CLIP_LAUNCH, CONTROL, SCENE_LAUNCH, SHIFT
 
 
 class ClipButton(ButtonBehavior, BoxLayout):
     def __init__(self, widget_data, light_color=ClipColors.grey):
+        self.id = widget_data.name
         super(ClipButton, self).__init__()
         self.widget_data = widget_data
         self.light_color = light_color
@@ -28,6 +29,7 @@ class ClipButton(ButtonBehavior, BoxLayout):
 
 class RoundButton(ButtonBehavior, BoxLayout):
     def __init__(self, widget_data, valid_colors, light_color):
+        self.id = widget_data.name
         super(RoundButton, self).__init__()
         #ButtonBehavior.__init__(self)
         #FloatLayout.__init__(self)
@@ -77,18 +79,18 @@ def create_widget(widget_data):
     """
     if isinstance(widget_data, GridButton):
         button_type = widget_data.type
-        if button_type == "clip_launch":
+        if button_type == CLIP_LAUNCH:
             return ClipButton(widget_data)
-        elif button_type == "scene_launch":
+        elif button_type == SCENE_LAUNCH:
             return SceneButton(widget_data)
-        elif button_type == "control":
+        elif button_type == CONTROL:
             return ControlButton(widget_data)
-        elif button_type == "shift":
+        elif button_type == SHIFT:
             return ShiftButton(widget_data)
         else:
             raise ValueError("Unknown button type", widget_data)
     elif isinstance(widget_data, GridSlider):
-        return Slider(id=widget_data.id, min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
+        return Slider(id=widget_data.name, min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
         ##         slider.bind(value_normalized=self.handle_slide)
     else:
         raise ValueError("Unknown widget type", widget_data)
