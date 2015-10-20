@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import weakref
+
 from collections import namedtuple, OrderedDict
 
 from six import with_metaclass
@@ -51,20 +53,29 @@ class ClipColors(Enum):
     # red_blink = 4
     yellow = 5
     # yellow_blink = 6
+ClipColors.default = ClipColors.grey
 
 class SceneColors(Enum):
     grey = 0
     green = 1
+SceneColors.default = SceneColors.grey
 
 class ControlColors(Enum):
     grey = 0
     red = 1
-
+ControlColors.default = ControlColors.grey
 
 class GridButton(object):
-    def __init__(self, type, id, note, x, y):
+    def __init__(self, type, n, note, x, y, colors=None):
+        """
+        :param type: one of BUTTON_TYPES
+        :param n:    number of this type of button
+        :param note: midi note to trigger this button
+        :param x:    x on grid
+        :param y:    y on grid
+        """
         self.type = type
-        self.id = id
+        self.n = n
         self.note = note
         self.x = x
         self.y = y
@@ -72,22 +83,53 @@ class GridButton(object):
         self.pressed = False
         self.held = False
 
+        self.valid_colors = colors
+        if colors is not None:
+            self.light_color = colors.default
+
+        self.color_change_cb = None
+
+    def on_change_color(self, cb):
+        self.color_change_cb = cb
+
+    def set_color(self, color):
+        """
+        Set light color and call callback
+        :param color:
+        :return:
+        """
+        self.light_color = color
+        f = self.color_change_cb
+        if f is not None:
+            f(self)
+
     @property
     def name(self):
-        return "%s_%d" % (self.type, self.id)
+        return "%s_%d" % (self.type, self.n)
 
 
 class GridSlider(object):
-    def __init__(self, type, id, control, x, y):
-        self.type = type
-        self.id = id
+    def __init__(self, n, control, x, y, value=0):
+        """
+        :param n: number of this type of button
+        :param control: midi control id of this slider
+        :param x: x on grid
+        :param y: y on grid
+        """
+        self.type = SLIDER
+        self.n = n
         self.control = control
         self.x = x
         self.y = y
+        self.value = value
+
+    # def update_value(self, value):
+    #     """ :return: copy of slider, with different value """
+    #     return GridSlider(self.n, self.control, self.x, self.y, value)
 
     @property
     def name(self):
-        return "%s_%d" % (self.type, self.id)
+        return "%s_%d" % (self.type, self.n)
 
 # Control types  (name is type_id )
 CLIP_LAUNCH = "clip"
@@ -99,9 +141,12 @@ SLIDER = "slider"
 BUTTON_TYPES = [CLIP_LAUNCH, CONTROL, SCENE_LAUNCH, SHIFT]
 
 # Button event type
-PRESS = "press"
-RELEASE = "release"
-HOLD = "hold"
+BUTTON_PRESS = "press"
+BUTTON_RELEASE = "release"
+BUTTON_HOLD = "hold"
+
+# Control event types
+CONTROL_CHANGE = "change"
 
 class APCMiniModel(with_metaclass(Handler)):
     def __init__(self):
@@ -127,29 +172,29 @@ class APCMiniModel(with_metaclass(Handler)):
         for row in xrange(7, -1, -1):
             for col in xrange(0, 8):
                 note = (row * 8) + col
-                btn = GridButton(CLIP_LAUNCH, note, note, col, row)
+                btn = GridButton(CLIP_LAUNCH, note, note, col, row, ClipColors)
                 self.clip_buttons.append(btn)
                 self.add_grid_button(btn)
 
             # last column is scene launch
             scene_no, note = next(scenes)
-            btn = GridButton(SCENE_LAUNCH, scene_no, note, 9, note)
+            btn = GridButton(SCENE_LAUNCH, scene_no, note, 9, note, SceneColors)
             self.scene_buttons[note] = btn
             self.add_grid_button(btn)
 
         # row 8 - control buttons and shift
-        for i, note in enumerate(Button.CONTROL):
-            btn = GridButton(CONTROL, i, note, i, 8)
-            self.control_buttons[i] = btn
+        for n, note in enumerate(Button.CONTROL):
+            btn = GridButton(CONTROL, n, note, n, 8, ControlColors)
+            self.control_buttons[n] = btn
             self.add_grid_button(btn)
         else:
-            btn = GridButton(SHIFT, 0, Button.SHIFT, i, 8)
+            btn = GridButton(SHIFT, 0, Button.SHIFT, n, 8)
             self.add_grid_button(btn)
 
         # row 9 - sliders
-        for i, control in enumerate(Slider.SLIDER):
-            slider = GridSlider(SLIDER, i, control, i, 9)
-            self.control_sliders[i] = slider
+        for n, control in enumerate(Slider.SLIDER):
+            slider = GridSlider(n, control, n, 9)
+            self.control_sliders[n] = slider
             self.add_grid_slider(slider)
 
     def add_grid_button(self, w):
@@ -165,14 +210,6 @@ class APCMiniModel(with_metaclass(Handler)):
         """
         self.grid[(w.x, w.y)] = w
         self.control_sliders[w.control] = w
-
-    def add_button_handlers(self, btn):
-        ## TODO yagni ?
-        pass
-
-    def add_slider_handlers(self, slider):
-        ## TODO yagni ?
-        pass
 
     def add_observer(self, o):
         self.observers.append(o)
@@ -201,35 +238,35 @@ class APCMiniModel(with_metaclass(Handler)):
     ### handlers for midi data from APC    
     @midi.handle(dict(type="note_on", note__in=Button.CLIP))
     def recv_clip_press(self, msg):
-        self.midi_button_event(CLIP_LAUNCH, PRESS, msg)
+        self.midi_button_event(CLIP_LAUNCH, BUTTON_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note__in=Button.CLIP))
     def recv_clip_release(self, msg):
-        self.midi_button_event(CLIP_LAUNCH, RELEASE, msg)
+        self.midi_button_event(CLIP_LAUNCH, BUTTON_RELEASE, msg)
 
     @midi.handle(dict(type="note_on", note__in=Button.CONTROL))
     def recv_control_press(self, msg):
-        self.midi_button_event(CONTROL, PRESS, msg)
+        self.midi_button_event(CONTROL, BUTTON_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note__in=Button.CONTROL))
     def recv_control_release(self, msg):
-        self.midi_button_event(CONTROL, RELEASE, msg)
+        self.midi_button_event(CONTROL, BUTTON_RELEASE, msg)
 
     @midi.handle(dict(type="note_on", note__in=Button.SCENE))
     def recv_scene_press(self, msg):
-        self.midi_button_event(SCENE_LAUNCH, PRESS, msg)
+        self.midi_button_event(SCENE_LAUNCH, BUTTON_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note__in=Button.SCENE))
     def recv_scene_release(self, msg):
-        self.midi_button_event(SCENE_LAUNCH, RELEASE, msg)
+        self.midi_button_event(SCENE_LAUNCH, BUTTON_RELEASE, msg)
 
     @midi.handle(dict(type="note_on", note=Button.SHIFT))
     def recv_shift_press(self, msg):
-        self.midi_button_event(SHIFT, PRESS, msg)
+        self.midi_button_event(SHIFT, BUTTON_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note=Button.SHIFT))
     def recv_shift_release(self, msg):
-        self.midi_button_event(SHIFT, RELEASE, msg)
+        self.midi_button_event(SHIFT, BUTTON_RELEASE, msg)
 
     @midi.handle(dict(type="control_change", control__in=Slider.SLIDER))
     def recv_slide(self, msg):
@@ -241,6 +278,16 @@ class APCMiniObserver(object):
     """
     Extend to recieve events from the APC Mini
     """
+
+    def on_press(self, source, btb):
+        pass
+
+    def on_hold(self, source, btb):
+        pass
+
+    def on_release(self, source, btb):
+        pass
+
     def on_clip_press(self, source, btn):
         """
         clip button was pressed
@@ -274,7 +321,7 @@ class APCMiniObserver(object):
 
 class APCMiniDebugObserver(APCMiniObserver):
     """
-    Extend to recieve events from the APC Mini
+    Extend to receive events from the APC Mini
     """
     def on_clip_press(self, source, btn):
         print("clip_press", btn)
