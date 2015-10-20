@@ -1,8 +1,10 @@
 apcmm
 -----
 
-Use APC Mini to send OSC messages
+APC Mini API and emulator.
 
 
 
+run emulator
+------------
 ```$ apcmm```
