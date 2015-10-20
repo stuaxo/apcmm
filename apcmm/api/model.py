@@ -289,14 +289,3 @@ class APCMiniDebugObserver(APCMiniObserver):
 
     def on_control_change(self, source, ctl, value):
         print("control_change", ctl, value)
-
-# m=mido.open_ioport(RECV_MIDI, callback=midi.dispatch)
-# print(m.name)
-
-# debug_observer = APCMiniDebugObserver()
-# apcmini = APCMini(m)
-# apcmini.add_observer(debug_observer)
-
-# for i in xrange(15, -1, -1):
-#     #print i
-#     sleep(1)
