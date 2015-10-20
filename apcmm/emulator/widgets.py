@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 from kivy.app import App
-from kivy.core.text import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.dropdown import DropDown
 
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
-from apcmm.api.model import GridButton, GridSlider
 from apcmm.emulator.buttons import create_widget
-
-import mido
 
 
 class MidiChooserPopup(Popup):
-    def __init__(self, on_change_midi=None, *args, **kwargs):
+    def __init__(self, on_change_midi=None, midi_port=None, *args, **kwargs):
+        # TODO - select current midi device
         self.on_change_midi = on_change_midi
         super(MidiChooserPopup, self).__init__(*args, **kwargs)
-        self.ids['midi_devices'].adapter.bind(on_selection_change=self.select_midi_device)
+        adapter = self.ids['midi_devices'].adapter
+        adapter.select_data_item(midi_port) ## TODO - IS this setting the selection ??
+        adapter.bind(on_selection_change=self.select_midi_device)
 
     def select_midi_device(self, adapter, *args, **kwargs):
         if len(adapter.selection) and self.on_change_midi is not None:
@@ -30,10 +26,13 @@ class ApcMiniScreen(Screen):
         Screen.__init__(self, *args, **kwargs)
 
     def toggle_midi_dropdown(self, btn):
-        p = MidiChooserPopup(on_change_midi=self.change_midi_device)
+        app = App.get_running_app()
+        p = MidiChooserPopup(on_change_midi=self.change_midi_device, midi_port=app.midi_port)
         p.open()
 
     def change_midi_device(self,  portname):
+        app = App.get_running_app()
+        app.midi_port = portname
         self.ids['toggle_midi_popup'].text = "> %s" % portname
 
 
@@ -46,6 +45,7 @@ class APCMiniWidget(GridLayout):
     sliders are in a dict indexed by control
     """
     def __init__(self, model=None, *args, **kwargs):
+        # TODO setup handlers..
         if model is None:
             # TOOD - this is kind of horrible..
             app = App.get_running_app()
@@ -57,111 +57,3 @@ class APCMiniWidget(GridLayout):
             widget = create_widget(widget_data)
             if widget:
                 self.add_widget(widget)
-
-        ## BOTTOM_LABELS = [[u"▲"], [u"▼"], [u"◀"], [u"▶"], ["volume", "pan", "send", "device"], ["shift"]]
-        # self.note_buttons = {}
-        # self.control_sliders = {}
-        #
-        # scene_ids = xrange(82, 90).__iter__()
-        # for row in xrange(7, -1, -1):
-        #     for col in xrange(0, 8):
-        #         # first 8 cols are clip launchers
-        #         note = (row * 8) + col
-        #         self.add_widget( self.create_button("clip_launch_%d" % note, note) )
-        #
-        #     # last column is scene launch
-        #     note = next(scene_ids)
-        #     self.add_widget( self.create_button("scene_launch_%d" % row, note) )
-        #
-        # # row 8 - control buttons and shift
-        # for i, note in enumerate(xrange(64, 72)):
-        #     self.add_widget( self.create_button("control_%d" % i, note) )
-        #
-        # self.add_widget( self.create_button("shift", 98) )
-        #
-        # # row 9 - sliders
-        # for i, note in enumerate(xrange(48, 57)):
-        #     self.add_widget( self.create_slider("slider_%d" % i, note) )
-
-    # def create_button(self, id, note):
-    #     button = MidiButton(note=note, id=id, text="")
-    #     button.bind(on_press=self.handle_press)
-    #     button.bind(on_release=self.handle_release)
-    #     self.note_buttons[note] = button
-    #     return button
-    #
-    # def create_slider(self, id, controller):
-    #     slider = Slider(id=id, min=0, max=127, value=63, orientation='vertical', size_hint=(1. / 9, 8))
-    #     slider.bind(value_normalized=self.handle_slide)
-    #     self.control_sliders[controller] = slider
-    #     return slider
-    #
-    # def clear_clip_lights(self):
-    #     for button in self.note_buttons.values():
-    #         if button.id.startswith('clip_launch_'):
-    #             button.state = 'normal'
-    #
-    # def clear_all_lights(self):
-    #     self.clear_clip_lights()
-        
-
-    # def recv_midi(self, msg):
-    #     """
-    #     Change the state of a button or slider in response to midi
-    #     """
-    #     if msg.type in ['note_on', 'note_off']:
-    #         print 'got midi %s' % msg
-    #         button = self.note_buttons.get(msg.note)
-    #         if button.id == 'shift':
-    #             app = App.get_running_app()
-    #             app.do_action(button)
-    #             return
-    #         if button:
-    #             if msg.type == 'note_on':
-    #                 print 'set button %s %s' % (button.id, id(button))
-    #                 button.state = 'down'
-    #                 self.handle_press(button)
-    #             elif msg.type == 'note_off':
-    #                 button.state = 'normal'
-    #                 self.handle_release(button)
-    #             button.canvas.ask_update()
-    #         else:
-    #             print 'no button mapped to note {}'.format(msg.note)
-    #     elif msg.type == 'control_change':
-    #         slider = self.control_sliders.get(msg.control)
-    #         if slider:
-    #             slider.value = msg.value
-    #             slider.canvas.ask_update()
-    #         else:
-    #             print 'no slider mapped to control {}'.format(msg.control)
-    #
-    # def handle_press(self, button):
-    #     app = App.get_running_app()
-    #     if app.light_behaviour == GATE:
-    #         button.light_color = DEFAULT_COLOR
-    #         m = mido.Message('note_on', note=button.note, velocity=button.light_color)
-    #         app.midiport.send(m)
-    #     elif app.light_behaviour == TOGGLE:
-    #         if button.light_color is OFF:
-    #             button.light_color = DEFAULT_COLOR
-    #         else:
-    #             curr_index = ALL_SOLID_COLORS.index(button.light_color)
-    #             curr_index = (curr_index + 1) % (len(ALL_SOLID_COLORS))
-    #             button.light_color = ALL_SOLID_COLORS[curr_index]
-    #         m = mido.Message('note_on', note=button.note, velocity=button.light_color)
-    #         app.midiport.send(m)
-    #
-    # def handle_release(self, button):
-    #     app = App.get_running_app()
-    #     if app.light_behaviour == GATE:
-    #         m = mido.Message('note_on', note=button.note, velocity=OFF)
-    #         app.midiport.send(m)
-    #
-    #
-    # def handle_slide(self, slider, *args, **kwargs):
-    #     try:
-    #         print Fore.WHITE, 'slide %s %d' % (slider.id, slider.value)
-    #         send_volume( slider.value )
-    #         print Fore.WHITE, '/slide'
-    #     except Exception as e:
-    #         print  Fore.WHITE, '/slide exception HS', e

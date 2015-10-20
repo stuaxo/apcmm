@@ -58,7 +58,7 @@
                     title: 'Blinkenlights'
                 ActionOverflow:
                 ActionButton:
-                    text: '> Disconnected'  # TODO - load this from config
+                    text: '> %s' % app.midi_port # TODO - load this from config
                     size_hint: 1, 1
                     on_release: apc_screen.toggle_midi_dropdown(self)
                     id: toggle_midi_popup

@@ -11,9 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 class ApcMiniEmu(App):
+    DISCONNECTED = "Disconnected"
     virtual_apc = APCMiniModel()  # singleton for kv lang
 
     def __init__(self):
+        self.midi_port = ApcMiniEmu.DISCONNECTED
         App.__init__(self)
 
     def build(self):
