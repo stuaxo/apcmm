@@ -2,15 +2,10 @@ from __future__ import print_function
 
 from collections import namedtuple, OrderedDict
 
-import mido
-
-from mnd.dispatch import Dispatcher
-
 from six import with_metaclass
 from six.moves import range
 from mnd.dispatch import Dispatcher
-from mnd.handler import Handler, handle
-from time import sleep
+from mnd.handler import Handler
 
 from enum import Enum
 
@@ -65,96 +60,20 @@ class ControlColors(Enum):
     grey = 0
     red = 1
 
-GridButton = namedtuple("GridButton", "type id note x y")
-GridSlider = namedtuple("GridSlider", "id control x y")
+GridButton = namedtuple("GridButton", "type name id note x y")
+GridSlider = namedtuple("GridSlider", "id name control x y")
 
-#
-# class APCMiniModel(object):
-#     """
-#     Data for APC Mini
-#     """
-#     def __init__(self, mido_socket=None):
-#         self.mido_socket = mido_socket
-#         self.observers = []
-#
-#         # setup dicts of the widgets in the grid
-#         # so it's easy to retrieve them later
-#
-#         self.clip_buttons = []
-#         self.control_buttons = {}
-#         self.scene_buttons = {}
-#         self.shift_button = {}
-#         self.grid = {}
-#
-#         self.note_buttons = {}
-#         self.control_sliders = {}
-#
-#         # TODO - find out about control buttons
-#
-#         # 8x8 grid of clip launch buttons, and column of
-#         # scene launch buttons on the right
-#         scenes = zip(xrange(8), Button.SCENE).__iter__()
-#         for row in xrange(7, -1, -1):
-#             for col in xrange(0, 8):
-#                 note = (row * 8) + col
-#                 name = "clip_%d" % note
-#                 btn = GridButton("clip_launch", note, note, col, row)
-#                 self.clip_buttons.append(btn)
-#                 self.add_grid_button(btn)
-#
-#             # last column is scene launch
-#             scene_no, note = next(scenes)
-#             name = "scene_%d" % scene_no
-#             btn = GridButton("scene_launch", scene_no, note, 9, note)
-#             self.scene_buttons[note] = btn
-#             self.add_grid_button(btn)
-#
-#         # row 8 - control buttons and shift
-#         for i, note in enumerate(Button.CONTROL):
-#             name = "control_%d" % i
-#             btn = GridButton("control", i, note, i, 8)
-#             self.control_buttons[i] = btn
-#             self.add_grid_button(btn)
-#         else:
-#             btn = GridButton("shift", 0, Button.SHIFT, i, 8)
-#             self.add_grid_button(btn)
-#
-#         # row 9 - sliders
-#         for i, control in enumerate(Slider.SLIDER):
-#             name = "slider_%d" % i
-#             slider = GridSlider(control, i, 9)
-#             self.control_sliders[i] = slider
-#             self.add_grid_slider(slider)
-#
-#     def add_grid_button(self, w):
-#         """
-#         Add widget with x, y
-#         """
-#         self.grid[(w.x, w.y)] = w
-#         self.note_buttons[w.note] = w
-#
-#     def add_grid_slider(self, w):
-#         """
-#         Add widget with x, y
-#         """
-#         self.grid[(w.x, w.y)] = w
-#         self.control_sliders[w.control] = w
-#
-#     def add_button_handlers(self, btn):
-#         ## TODO yagni ?
-#         pass
-#
-#     def add_slider_handlers(self, slider):
-#         ## TODO yagni ?
-#         pass
-#
-#     def add_observer(self, o):
-#         self.observers.append(o)
+CLIP_LAUNCH = "clip_launch"
+SCENE_LAUNCH = "scene_launch"
+CONTROL = "control"
+SHIFT = "shift"
+SLIDER = "slider"
+
+BUTTON_TYPES = [CLIP_LAUNCH, CONTROL, SCENE_LAUNCH, SHIFT]
 
 
 class APCMiniModel(with_metaclass(Handler)):
-    def __init__(self, mido_socket=None):
-        self.mido_socket = mido_socket
+    def __init__(self):
         self.observers = []
 
         # setup dicts of the widgets in the grid
@@ -177,32 +96,32 @@ class APCMiniModel(with_metaclass(Handler)):
         for row in xrange(7, -1, -1):
             for col in xrange(0, 8):
                 note = (row * 8) + col
-                name = "clip_%d" % note
-                btn = GridButton("clip_launch", note, note, col, row)
+                name = "%s_%d" % (CLIP_LAUNCH, note)
+                btn = GridButton(CLIP_LAUNCH, name, note, note, col, row)
                 self.clip_buttons.append(btn)
                 self.add_grid_button(btn)
 
             # last column is scene launch
             scene_no, note = next(scenes)
-            name = "scene_%d" % scene_no
-            btn = GridButton("scene_launch", scene_no, note, 9, note)
+            name = "%s_%d" % (SCENE_LAUNCH, scene_no)
+            btn = GridButton(SCENE_LAUNCH, name, scene_no, note, 9, note)
             self.scene_buttons[note] = btn
             self.add_grid_button(btn)
 
         # row 8 - control buttons and shift
         for i, note in enumerate(Button.CONTROL):
-            name = "control_%d" % i
-            btn = GridButton("control", i, note, i, 8)
+            name = "%s_%d" % (CONTROL, i)
+            btn = GridButton(CONTROL, name, i, note, i, 8)
             self.control_buttons[i] = btn
             self.add_grid_button(btn)
         else:
-            btn = GridButton("shift", 0, Button.SHIFT, i, 8)
+            btn = GridButton(SHIFT, SHIFT, 0, Button.SHIFT, i, 8)
             self.add_grid_button(btn)
 
         # row 9 - sliders
         for i, control in enumerate(Slider.SLIDER):
-            name = "slider_%d" % i
-            slider = GridSlider(name, control, i, 9)
+            name = "%s_%d" % (SLIDER, i)
+            slider = GridSlider(SLIDER, name, control, i, 9)
             self.control_sliders[i] = slider
             self.add_grid_slider(slider)
 

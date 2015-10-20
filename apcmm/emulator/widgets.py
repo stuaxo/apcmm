@@ -32,7 +32,7 @@ class ApcMiniScreen(Screen):
 
     def change_midi_device(self,  portname):
         app = App.get_running_app()
-        app.midi_port = portname
+        app.connect_midi(portname)
         self.ids['toggle_midi_popup'].text = "> %s" % portname
 
 

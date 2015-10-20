@@ -23,6 +23,9 @@ class ApcMiniEmu(App):
         sm.add_widget(ApcMiniScreen(name="main_screen"))
         return sm
 
+    def connect_midi(self, portname):
+        self.midi_port = portname
+
 def main():
     try:
         app = ApcMiniEmu()
