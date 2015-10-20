@@ -1,3 +1,8 @@
+#:import mido mido
+
+#:import ListItemButton kivy.uix.listview.ListItemButton
+
+#:import la kivy.adapters.listadapter
 #:import APCMiniWidget apcmm.emulator.widgets.APCMiniWidget
 
 <ClipButton>:
@@ -14,7 +19,35 @@
         source: 'images/round-button-grey.png'
         size_hint: 1, 1
 
+
+<MidiChooserPopup>:
+    id: midipopup
+    size_hint: .5, .5
+    auto_dismiss: True
+    title: 'Connect To Midi'
+    BoxLayout:
+        id: content
+        orientation: "vertical"
+
+        ListView:
+            id: midi_devices
+            size_hint: 1,.8
+
+            adapter:
+                la.ListAdapter(
+                data=["Disconnected"] + mido.get_ioport_names(),
+                cls=ListItemButton,
+                allow_empty_selection=True,
+                selection_mode='single',
+                )
+
+        Button:
+            text: 'Cancel'
+            on_press: root.dismiss()
+            size_hint_y: 0.2
+
 <ApcMiniScreen>:
+    id: apc_screen
     FloatLayout:
         ActionBar:
             size_hint: 1,0.1
@@ -24,6 +57,11 @@
                 ActionPrevious:
                     title: 'Blinkenlights'
                 ActionOverflow:
+                ActionButton:
+                    text: '> Disconnected'  # TODO - load this from config
+                    size_hint: 1, 1
+                    on_release: apc_screen.toggle_midi_dropdown(self)
+                    id: toggle_midi_popup
                 ActionButton:
                     text: 'Gate'
                 ActionButton:

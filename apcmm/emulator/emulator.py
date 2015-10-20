@@ -4,17 +4,16 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 
 from apcmm.api.model import APCMiniModel
+from apcmm.emulator.widgets import ApcMiniScreen
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-class ApcMiniScreen(Screen):
-    pass
-
 class ApcMiniEmu(App):
+    virtual_apc = APCMiniModel()  # singleton for kv lang
+
     def __init__(self):
-        ApcMiniEmu.virtual_apc = APCMiniModel()  # singleton :/
         App.__init__(self)
 
     def build(self):

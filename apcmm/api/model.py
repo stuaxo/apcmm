@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 from collections import namedtuple, OrderedDict
-from time import sleep
 
 import mido
 

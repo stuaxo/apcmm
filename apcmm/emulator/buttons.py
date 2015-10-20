@@ -88,8 +88,7 @@ def create_widget(widget_data):
         else:
             raise ValueError("Unknown button type", widget_data)
     elif isinstance(widget_data, GridSlider):
-        return Slider(id=widget_data.id, min=0, max=127, value=63, orientation='vertical', size_hint=(1. / 9, 8))
+        return Slider(id=widget_data.id, min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
         ##         slider.bind(value_normalized=self.handle_slide)
-        return None
     else:
         raise ValueError("Unknown widget type", widget_data)

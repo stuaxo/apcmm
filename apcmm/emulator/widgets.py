@@ -1,9 +1,42 @@
 # -*- coding: utf-8 -*-
 from kivy.app import App
+from kivy.core.text import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
 
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.popup import Popup
+from kivy.uix.screenmanager import Screen
 from apcmm.api.model import GridButton, GridSlider
 from apcmm.emulator.buttons import create_widget
+
+import mido
+
+
+class MidiChooserPopup(Popup):
+    def __init__(self, on_change_midi=None, *args, **kwargs):
+        self.on_change_midi = on_change_midi
+        super(MidiChooserPopup, self).__init__(*args, **kwargs)
+        self.ids['midi_devices'].adapter.bind(on_selection_change=self.select_midi_device)
+
+    def select_midi_device(self, adapter, *args, **kwargs):
+        if len(adapter.selection) and self.on_change_midi is not None:
+            self.on_change_midi(adapter.selection[0].text)
+            self.dismiss()
+
+class ApcMiniScreen(Screen):
+    def __init__(self, *args, **kwargs):
+        Screen.__init__(self, *args, **kwargs)
+
+    def toggle_midi_dropdown(self, btn):
+        p = MidiChooserPopup(on_change_midi=self.change_midi_device)
+        p.open()
+
+    def change_midi_device(self,  portname):
+        self.ids['toggle_midi_popup'].text = "> %s" % portname
+
+
 
 class APCMiniWidget(GridLayout):
     """
