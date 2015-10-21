@@ -124,9 +124,39 @@
                             id: mapping
                             ## thing: root.blah ## TODO
                         BoxLayout:
+                            id: "sidebar"
                             size_hint_x: 0.3
-                            Label:
-                                text: 'action stack'
-                    Label:
+                            orientation: "vertical"
+                            canvas.before:
+                                Color:
+                                    rgba: 0.1, 0.1, 0.1, 1
+                                Rectangle:
+                                    # self here refers to the widget i.e BoxLayout
+                                    pos: self.pos
+                                    size: self.size
+                            Button:
+                                text: "> Add"
+                                size_hint: 0.3, 0.1
+                                pos_hint: {"top": 1, "left": 0}
+                            FloatLayout:
+                                id: "actions"
+                                orientation: "vertical"
+                                pos_hint: {"top": 1}
+                                size_hint_y: 0.9
+                                BoxLayout:
+                                    id: "action_stack"
+                                Label:
+                                    text: "actions"
+                                    pos_hint: {'x': 0, 'y': 0}
+                    BoxLayout:
+                        id: "edit_action"
                         size_hint_y: 0.3
-                        text: "edit action"
+                        canvas.before:
+                            Color:
+                                rgba: 0.15, 0.15, 0.15, 1
+                            Rectangle:
+                                # self here refers to the widget i.e BoxLayout
+                                pos: self.pos
+                                size: self.size
+                        Label:
+                            text: "Edit Action"
