@@ -60,7 +60,6 @@ class ActionEventWidget(BoxLayout):
         self.bind(action_type=self.update_trigger)
 
     def update_trigger(self, widget, trigger):
-        print "update_trigger", trigger
         assert trigger in ['start', 'end']
         if trigger == 'start':
             # press or long_press
