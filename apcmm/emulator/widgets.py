@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
@@ -39,6 +41,46 @@ class PerformanceScreen(Screen):
         app = App.get_running_app()
         app.connect_midi(portname)
         self.ids['toggle_midi_popup'].text = "> %s" % portname
+
+
+class ActionTitleBar(BoxLayout):
+    pass
+
+
+class ActionEventWidget(BoxLayout):
+    """
+    one event in an action, e.g. 'start', 'stop'
+    """
+    name = ObjectProperty()
+    action_type = ObjectProperty()
+
+    def __init__(self, *args, **kwargs):
+        BoxLayout.__init__(self, *args, **kwargs)
+        self.bind(name=self.update_name)
+        self.bind(action_type=self.update_trigger)
+
+    def update_trigger(self, widget, trigger):
+        print "update_trigger", trigger
+        assert trigger in ['start', 'end']
+        if trigger == 'start':
+            # press or long_press
+            ## TODO - read this from somewhere
+            self.ids['trigger'].text = 'press'
+        else:
+            # release
+            ## TODO - read this from somewhere
+            self.ids['trigger'].text = 'release'
+
+
+    def update_name(self, widget, name):
+        self.ids['action'].text = name
+
+    #def update_name(self, widget, value):
+    #    self.ids['action'].text = value
+
+
+class ActionEditor(FloatLayout):
+    pass
 
 
 class EditScreen(Screen):

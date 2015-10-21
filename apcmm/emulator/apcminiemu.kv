@@ -3,7 +3,7 @@
 #:import ListItemButton kivy.uix.listview.ListItemButton
 #:import TabbedPanelItem kivy.uix.tabbedpanel.TabbedPanelItem
 #:import TabbedPanel kivy.uix.tabbedpanel.TabbedPanel
-
+#:import TextInput kivy.uix.textinput.TextInput
 #:import la kivy.adapters.listadapter
 #:import APCMiniModel apcmm.api.model.APCMiniModel
 #:import APCMiniWidget apcmm.emulator.widgets.APCMiniWidget
@@ -81,6 +81,70 @@
             size_hint: 1, 0.9
 
 
+<ActionTitleBar>:
+    id: title
+    size_hint: 1, 0.9
+    Label:
+        text: "Edit"
+        size_hint: 0.3, 1
+    Label:
+        text: "Name:"
+        size_hint: 0.3, 1
+    TextInput:
+        text: "Smiley Control"
+        size_hint: 0.2, 1
+        multiline: False
+        background_color: 1, 1, 1, 0.025
+        foreground_color: 1, 1, 1, 1
+    ActionToggleButton:
+        text: 'toggle'
+        group: 'toggle_type'
+    ActionToggleButton:
+        text: 'gate'
+        group: 'toggle_type'
+    ActionToggleButton:
+        text: 'one shot'
+        group: 'toggle_type'
+
+
+<ActionEventWidget>:
+    Label:
+        id: action
+        text: ""
+        width: 0.4
+    Button:
+        id: trigger
+        text: ""
+        width: 0.4
+
+<ActionEditor>:
+    id: edit_action
+    size_hint_y: 0.3
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.15, 0.15, 1
+        Rectangle:
+            # self here refers to the widget i.e BoxLayout
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        id: bottom_bar
+        orientation: "vertical"
+        ActionTitleBar:
+        ActionEventWidget:
+            id: start
+            action_type: "start"
+            name: "Start"
+        ActionEventWidget:
+            id: end
+            action_type: "end"
+            name: "End"
+    #Label:
+    #    text: "Edit Action"
+    #    foreground_color: 0.5, 0.5, 0.5, 1
+
+
+
 <EditScreen>:
     id: edit
     FloatLayout:
@@ -100,17 +164,11 @@
                     size_hint: 1, 1
                     #on_release: root.toggle_midi_dropdown(self)
                     id: profile_list
-                ActionToggleButton:
-                    text: 'press'
-                    group: 'map_to'
-                ActionToggleButton:
-                    text: 'hold'
-                    group: 'map_to'
-                ActionToggleButton:
-                    text: 'release'
-                    group: 'map_to'
                 ActionButton:
                     text: 'Save'
+                    on_press:
+                        root.manager.transition.direction = 'up'
+                        root.manager.current = 'perform'
         TabbedPanel:
             do_default_tab: False
             tab_width: self.parent.width / (len(self.tab_list) + 1)
@@ -124,7 +182,7 @@
                             id: mapping
                             ## thing: root.blah ## TODO
                         BoxLayout:
-                            id: "sidebar"
+                            id: side_bar
                             size_hint_x: 0.3
                             orientation: "vertical"
                             canvas.before:
@@ -139,24 +197,23 @@
                                 size_hint: 0.3, 0.1
                                 pos_hint: {"top": 1, "left": 0}
                             FloatLayout:
-                                id: "actions"
+                                id: actions
                                 orientation: "vertical"
                                 pos_hint: {"top": 1}
                                 size_hint_y: 0.9
-                                BoxLayout:
-                                    id: "action_stack"
                                 Label:
                                     text: "actions"
                                     pos_hint: {'x': 0, 'y': 0}
-                    BoxLayout:
-                        id: "edit_action"
-                        size_hint_y: 0.3
-                        canvas.before:
-                            Color:
-                                rgba: 0.15, 0.15, 0.15, 1
-                            Rectangle:
-                                # self here refers to the widget i.e BoxLayout
-                                pos: self.pos
-                                size: self.size
-                        Label:
-                            text: "Edit Action"
+                                ListView:
+                                    id: action_stack
+                                    size_hint: 1,.8
+                                    pos_hint: {'x': 0, 'top': 1}
+                                    adapter:
+                                        la.ListAdapter(
+                                        data=["Smiley Control",],
+                                        cls=ListItemButton,
+                                        allow_empty_selection=True,
+                                        selection_mode='single',
+                                        )
+                    ActionEditor:
+                        id: bottom_bar
