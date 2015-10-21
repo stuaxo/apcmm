@@ -1,10 +1,8 @@
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
-
 from kivy.uix.button import Button
-from kivy.uix.slider import Slider
 
-from apcmm.api.model import ClipColors, ControlColors, SceneColors, GridButton, GridSlider, CLIP_LAUNCH, CONTROL, SCENE_LAUNCH, SHIFT
+from apcmm.api.model import ControlColors, SceneColors
 
 
 class ClipButton(ButtonBehavior, BoxLayout):
@@ -69,26 +67,3 @@ class ShiftButton(Button):
 
 
 
-def create_widget(widget_data):
-    """
-
-    :param widget_data:  models.GridButton or models.GridSlider instance
-    :return:
-    """
-    if isinstance(widget_data, GridButton):
-        button_type = widget_data.type
-        if button_type == CLIP_LAUNCH:
-            return ClipButton(widget_data)
-        elif button_type == SCENE_LAUNCH:
-            return SceneButton(widget_data)
-        elif button_type == CONTROL:
-            return ControlButton(widget_data)
-        elif button_type == SHIFT:
-            return ShiftButton(widget_data)
-        else:
-            raise ValueError("Unknown button type", widget_data)
-    elif isinstance(widget_data, GridSlider):
-        return Slider(id=widget_data.name, min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
-        ##         slider.bind(value_normalized=self.handle_slide)
-    else:
-        raise ValueError("Unknown widget type", widget_data)

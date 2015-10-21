@@ -4,13 +4,14 @@
 title = MiniMu
 
 # (str) Package name
-package.name = minimu
+package.name = apcmm
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.minimu
 
 # (str) Source code where the main.py live
-source.dir = apcmm/emulator/
+#source.dir = apcmm/emulator/
+source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas
@@ -33,7 +34,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,sqlite3,pil,mido
+requirements = kivy,sqlite3,pil,mido,six,mnd,enum34
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes

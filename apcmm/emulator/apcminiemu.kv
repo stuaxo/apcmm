@@ -1,6 +1,8 @@
 #:import mido mido
 
 #:import ListItemButton kivy.uix.listview.ListItemButton
+#:import TabbedPanelItem kivy.uix.tabbedpanel.TabbedPanelItem
+#:import TabbedPanel kivy.uix.tabbedpanel.TabbedPanel
 
 #:import la kivy.adapters.listadapter
 #:import APCMiniModel apcmm.api.model.APCMiniModel
@@ -109,6 +111,22 @@
                     group: 'map_to'
                 ActionButton:
                     text: 'Save'
-        APCMiniWidget:
-            id: mapping
-            size_hint: 0.5, 0.45
+        TabbedPanel:
+            do_default_tab: False
+            tab_width: self.parent.width / (len(self.tab_list) + 1)
+            size_hint_y: 0.9
+            TabbedPanelItem:
+                text: "Mapping"
+                BoxLayout:
+                    orientation: "vertical"
+                    BoxLayout:
+                        APCMiniWidget:
+                            id: mapping
+                            ## thing: root.blah ## TODO
+                        BoxLayout:
+                            size_hint_x: 0.3
+                            Label:
+                                text: 'action stack'
+                    Label:
+                        size_hint_y: 0.3
+                        text: "edit action"
