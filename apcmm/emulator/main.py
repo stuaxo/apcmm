@@ -1,35 +1,42 @@
+import argparse
 import logging
 
 from kivy.app import App
-from kivy.uix.screenmanager import Screen, ScreenManager
+from kivy.uix.screenmanager import ScreenManager
 
-from apcmm.api.model import APCMiniModel
-from apcmm.emulator.widgets import EditScreen, PerformanceScreen
+import signal
+
+import apcmm.api.model as model
+import apcmm.emulator.widgets as widgets
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+app = None
 
 class ApcMiniEmu(App):
     DISCONNECTED = "Disconnected"
     DEFAULT_PROFILE = "default"
-    virtual_apc = APCMiniModel()  # singleton for kv lang
-    m = APCMiniModel()
+    virtual_apc = model.APCMiniModel()  # singleton for kv lang
+    m = model.APCMiniModel()
 
-    def __init__(self):
+    def __init__(self, first_screen=None):
+        self.first_screen = first_screen
         self.midi_port = ApcMiniEmu.DISCONNECTED
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
         App.__init__(self)
 
     def build(self):
         sm = ScreenManager()
-        sm.add_widget(PerformanceScreen(name="perform"))
-        sm.add_widget(EditScreen(name="edit"))
+        sm.add_widget(widgets.PerformanceScreen(name="perform"))
+        sm.add_widget(widgets.EditScreen(name="edit"))
+        if self.first_screen:
+            sm.current = self.first_screen
         return sm
 
     @property
     def profile_list(self):
-        return [ ApcMiniEmu.DEFAULT_PROFILE, "test_profile"]
+        return [ApcMiniEmu.DEFAULT_PROFILE, "test_profile"]
 
     @property
     def profile_model(self):
@@ -40,13 +47,25 @@ class ApcMiniEmu(App):
         self.midi_port = portname
 
 def main():
+    """
+    To use arguments they have to go after kivys ones so do
+
+    apcmm -- -sedit
+
+    (everything before -- is for kivy)
+    :return:
+    """
+    parser = argparse.ArgumentParser(description='Short sample app')
+    parser.add_argument("-s", action="store", dest="screen")
+    args = parser.parse_args()
+    if args.screen is not None:
+        if args.screen not in ["edit", "perform"]:
+            raise ValueError("Invalid screen")
+
     try:
-        app = ApcMiniEmu()
+        app = ApcMiniEmu(first_screen=args.screen)
         app.run()
     except Exception as e:
         print e
         logger.exception(e)
         raise e
-
-if __name__ == "__main__":
-    main()

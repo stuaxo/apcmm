@@ -2,7 +2,7 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 
-from apcmm.api.model import ControlColors, SceneColors
+import apcmm.api.model as model
 
 
 class ClipButton(ButtonBehavior, BoxLayout):
@@ -42,7 +42,7 @@ class ControlButton(RoundButton):
         RoundButton.__init__(self, data)
 
     def on_press(self):
-        print self.data.set_color(ControlColors.red)
+        print self.data.set_color(model.ControlColors.red)
 
     def on_release(self):
         print self.data.light_color
@@ -54,7 +54,7 @@ class SceneButton(RoundButton):
         RoundButton.__init__(self, data)
 
     def on_press(self):
-        print self.data.set_color(SceneColors.green)
+        print self.data.set_color(model.SceneColors.green)
 
     def on_release(self):
         print self.data.light_color
