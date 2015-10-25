@@ -70,12 +70,19 @@ class ActionEventWidget(BoxLayout):
             ## TODO - read this from somewhere
             self.ids['trigger'].text = 'release'
 
-
     def update_name(self, widget, name):
         self.ids['action'].text = name
 
     #def update_name(self, widget, value):
     #    self.ids['action'].text = value
+
+
+class SendOSCAction(ActionEventWidget):
+    def __init__(self, *args, **kwargs):
+        ActionEventWidget.__init__(self, *args, **kwargs)
+
+    def build(self):
+        print("build")
 
 
 class ActionEditor(FloatLayout):
