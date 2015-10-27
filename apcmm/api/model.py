@@ -66,9 +66,11 @@ class ControlColors(Enum):
     red = 1
 ControlColors.default = ControlColors.grey
 
+
 class GridButton(object):
 
     triggers = [TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE] # actions this can trigger
+    action_fields = ["type", "n", "note", "x", "y"]
 
     def __init__(self, type, n, note, x, y, colors=None):
         """
@@ -115,6 +117,7 @@ class GridButton(object):
 class GridSlider(object):
 
     trigger = [TRIGGER_CHANGE] # actions this can trigger
+    action_fields = ["type", "n", "control", "x", "y", "value"]
 
     def __init__(self, n, control, x, y, value=0):
         """
@@ -154,6 +157,7 @@ BUTTON_HOLD = "hold"
 
 # Control event types
 CONTROL_CHANGE = "change"
+
 
 class APCMiniModel(with_metaclass(Handler)):
     def __init__(self):

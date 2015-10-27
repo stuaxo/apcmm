@@ -49,6 +49,34 @@
             on_press: root.dismiss()
             size_hint_y: 0.2
 
+<ActionPopup>:
+    id: action_popup
+    size_hint: .5, .5
+    auto_dismiss: True
+    title: 'Actions'
+    BoxLayout:
+        id: content
+        orientation: "vertical"
+
+        ListView:
+            id: actions
+            size_hint: 1,.8
+
+            adapter:
+                la.ListAdapter(
+                data=["Send OSC"],
+                cls=ListItemButton,
+                allow_empty_selection=True,
+                selection_mode='single',
+                )
+
+        Button:
+            text: 'Cancel'
+            on_press: root.dismiss()
+            size_hint_y: 0.2
+
+
+
 <PerformanceScreen>:
     id: perform
     FloatLayout:
@@ -186,9 +214,11 @@
                                     pos: self.pos
                                     size: self.size
                             Button:
+                                id: add_action
                                 text: "> Add"
                                 size_hint: 0.3, 0.1
                                 pos_hint: {"top": 1, "left": 0}
+                                on_release: root.toggle_add_action_dropdown(self)
                             FloatLayout:
                                 id: actions
                                 orientation: "vertical"

@@ -5,6 +5,7 @@ TRIGGER_LONG_PRESS = "long_press"
 TRIGGER_RELEASE = "release"
 TRIGGER_CHANGE = "change"
 
+
 class ActionTriggers(object):
     # base class
     def __init__(self, start=None, end=None):
@@ -16,6 +17,7 @@ class ActionTriggers(object):
         self.start = start
         self.end = end
         self.name = re.sub(r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))', r' \1', self.__class__.__name__)
+
 
 class GateTriggers(ActionTriggers):
     """
@@ -48,12 +50,17 @@ TRIGGER_TYPES = [GateTriggers, ToggleTriggers, OneShotTriggers]
 
 
 class Action(object):
-    pass
+    def __init__(self):
+        print("set name to ", self.name)
+
+    @classmethod
+    def get_name(cls):
+        return re.sub(r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))', r' \1', cls.__name__)
 
 
 class SendOSC(Action):
     def __init__(self):
-        pass
+        Action.__init__(self)
 
     def start_action(self, source):
         """
@@ -67,3 +74,6 @@ class SendOSC(Action):
         :param source: what triggered the action
         """
         print("stop ")
+
+
+ACTIONS = [SendOSC]

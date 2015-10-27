@@ -2,6 +2,8 @@
 from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
 from kivy.uix.floatlayout import FloatLayout
 
 from kivy.uix.gridlayout import GridLayout
@@ -11,6 +13,25 @@ from kivy.uix.slider import Slider
 
 import apcmm.api as api
 import apcmm.emulator.buttons as buttons
+import apcmm.api.actions as actions
+
+
+class ActionPopup(Popup):
+    def __init__(self, on_change_action=None, *args, **kwargs):
+        # TODO - select current midi device
+        self.on_change_action = on_change_action
+        super(ActionPopup, self).__init__(*args, **kwargs)
+        adapter = self.ids['actions'].adapter
+        #adapter.select_data_item(midi_port) ## TODO - IS this setting the selection ??
+        adapter.bind(on_selection_change=self.select_action)
+
+    def select_action(self, adapter, *args, **kwargs):
+        pass
+        #if len(adapter.selection) and self.on_change_midi is not None:
+        #    self.on_change_midi(adapter.selection[0].text)
+        #    self.dismiss()
+
+
 
 class MidiChooserPopup(Popup):
     def __init__(self, on_change_midi=None, midi_port=None, *args, **kwargs):
@@ -18,7 +39,8 @@ class MidiChooserPopup(Popup):
         self.on_change_midi = on_change_midi
         super(MidiChooserPopup, self).__init__(*args, **kwargs)
         adapter = self.ids['midi_devices'].adapter
-        adapter.select_data_item(midi_port) ## TODO - IS this setting the selection ??
+        if midi_port:
+            adapter.select_data_item(midi_port) ## TODO - IS this setting the selection ??
         adapter.bind(on_selection_change=self.select_midi_device)
 
     def select_midi_device(self, adapter, *args, **kwargs):
@@ -96,11 +118,20 @@ class EditScreen(Screen):
 
     def __init__(self, *args, **kwargs):
         Screen.__init__(self, *args, **kwargs)
+        self.actions_dropdown = None
+
+    def toggle_add_action_dropdown(self, btn):
+        app = App.get_running_app()
+        p = ActionPopup(on_change_action=self.add_action)
+        p.open()
 
     def toggle_midi_dropdown(self, btn):
         app = App.get_running_app()
         p = MidiChooserPopup(on_change_midi=self.change_midi_device, midi_port=app.midi_port)
         p.open()
+
+    def add_action(self, action):
+        print("add action %s" % action)
 
     def change_midi_device(self,  portname):
         app = App.get_running_app()
