@@ -11,7 +11,7 @@ from mnd.handler import Handler
 
 from enum import Enum
 
-from actions import TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE, TRIGGER_CHANGE
+from actions import TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE, TRIGGER_CHANGE, ControlSource, ButtonSource
 
 RECV_MIDI = "APC MINI MIDI 1"
 SEND_MIDI = "APC MINI MIDI 1"
@@ -69,7 +69,8 @@ ControlColors.default = ControlColors.grey
 
 class GridButton(object):
 
-    triggers = [TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE] # actions this can trigger
+    triggers = ButtonSource
+
     action_fields = ["type", "n", "note", "x", "y"]
 
     def __init__(self, type, n, note, x, y, colors=None):
@@ -116,7 +117,8 @@ class GridButton(object):
 
 class GridSlider(object):
 
-    trigger = [TRIGGER_CHANGE] # actions this can trigger
+    triggers = ControlSource
+
     action_fields = ["type", "n", "control", "x", "y", "value"]
 
     def __init__(self, n, control, x, y, value=0):
@@ -176,6 +178,7 @@ class APCMiniModel(with_metaclass(Handler)):
         self.note_buttons = OrderedDict()     # indexed by note
         self.control_sliders = OrderedDict()  # indexed by control id
 
+        self.action_types = set()             # action sources
         # TODO - find out about control buttons
 
         # 8x8 grid of clip launch buttons, and column of
@@ -214,6 +217,7 @@ class APCMiniModel(with_metaclass(Handler)):
         """
         Add widget with x, y
         """
+        self.action_types.add(w.triggers)
         self.grid[(w.x, w.y)] = w
         self.note_buttons[w.note] = w
 
@@ -221,6 +225,7 @@ class APCMiniModel(with_metaclass(Handler)):
         """
         Add widget with x, y
         """
+        self.action_types.add(w.triggers)
         self.grid[(w.x, w.y)] = w
         self.control_sliders[w.control] = w
 
@@ -240,7 +245,7 @@ class APCMiniModel(with_metaclass(Handler)):
         :param ev_type: PRESS, RELEASE or HOLD
         :msg: mido midi msg
         """
-        assert name in BUTTON_TYPES, "Unknown midi button event %s" % btn_t
+        assert btn_t in BUTTON_TYPES, "Unknown midi button event %s" % btn_t
         btn = self.note_buttons[msg.note]
         btn.state = ev_type
         event = "%s_%s" % (btn_t, event_t)

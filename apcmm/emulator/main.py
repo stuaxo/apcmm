@@ -1,5 +1,6 @@
 import argparse
 import logging
+import mido
 
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
@@ -22,7 +23,7 @@ class ApcMiniEmu(App):
 
     def __init__(self, first_screen=None):
         self.first_screen = first_screen
-        self.midi_port = ApcMiniEmu.DISCONNECTED
+        self.midi_port = None
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
         App.__init__(self)
 
@@ -44,7 +45,26 @@ class ApcMiniEmu(App):
         return self.m
 
     def connect_midi(self, portname):
-        self.midi_port = portname
+        if self.midi_port:
+            self.midi_port.close()
+
+        def callback(msg):
+            pass
+
+        if portname is None:
+            self.midi_port = None
+        else:
+            self.midi_port = mido.open_ioport(portname, callback=callback, autoreset=True)
+
+    @property
+    def portname(self):
+        """
+        Midi port name or DISCONNECTED
+        """
+        if self.midi_port is None:
+            return ApcMiniEmu.DISCONNECTED
+        else:
+            return self.midi_port.name
 
 def main():
     """

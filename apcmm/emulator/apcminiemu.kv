@@ -1,10 +1,13 @@
 #:import mido mido
 
+#:import actions apcmm.api.actions
+
 #:import ListItemButton kivy.uix.listview.ListItemButton
 #:import TabbedPanelItem kivy.uix.tabbedpanel.TabbedPanelItem
 #:import TabbedPanel kivy.uix.tabbedpanel.TabbedPanel
 #:import TextInput kivy.uix.textinput.TextInput
 #:import la kivy.adapters.listadapter
+
 #:import APCMiniModel apcmm.api.model.APCMiniModel
 #:import APCMiniWidget apcmm.emulator.widgets.APCMiniWidget
 
@@ -33,12 +36,12 @@
         orientation: "vertical"
 
         ListView:
-            id: midi_devices
+            id: items
             size_hint: 1,.8
 
             adapter:
                 la.ListAdapter(
-                data=["Disconnected"] + mido.get_ioport_names(),
+                data=[app.DISCONNECTED] + mido.get_ioport_names(),
                 cls=ListItemButton,
                 allow_empty_selection=True,
                 selection_mode='single',
@@ -48,6 +51,7 @@
             text: 'Cancel'
             on_press: root.dismiss()
             size_hint_y: 0.2
+
 
 <ActionPopup>:
     id: action_popup
@@ -59,22 +63,24 @@
         orientation: "vertical"
 
         ListView:
-            id: actions
+            id: items
             size_hint: 1,.8
 
             adapter:
                 la.ListAdapter(
-                data=["Send OSC"],
+                data=[action.get_name() for action in actions.ACTIONS],
                 cls=ListItemButton,
                 allow_empty_selection=True,
                 selection_mode='single',
                 )
-
-        Button:
-            text: 'Cancel'
-            on_press: root.dismiss()
-            size_hint_y: 0.2
-
+        BoxLayout:
+            Button:
+                text: 'Cancel'
+                on_press: root.dismiss()
+                size_hint_y: 0.3
+            Button:
+                text: 'Add'
+                size_hint_y: 0.3
 
 
 <PerformanceScreen>:
@@ -168,6 +174,7 @@
 
 <EditScreen>:
     id: edit
+    model: app.virtual_apc
     FloatLayout:
         ActionBar:
             size_hint: 1,0.1
@@ -201,6 +208,7 @@
                     BoxLayout:
                         APCMiniWidget:
                             id: mapping
+                            model: root.model
                             ## thing: root.blah ## TODO
                         BoxLayout:
                             id: side_bar

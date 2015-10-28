@@ -6,6 +6,16 @@ TRIGGER_RELEASE = "release"
 TRIGGER_CHANGE = "change"
 
 
+class ButtonSource(object):
+    name = "Button"
+    triggers = frozenset({TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE})
+
+
+class ControlSource(object):
+    name = "Control"
+    triggers = frozenset({TRIGGER_CHANGE})
+
+
 class ActionTriggers(object):
     # base class
     def __init__(self, start=None, end=None):
@@ -23,6 +33,7 @@ class GateTriggers(ActionTriggers):
     """
     Gate is holding down a button it has a start and end
     """
+
     def __init__(self):
         ActionTriggers.__init__(
             self,
@@ -50,6 +61,10 @@ TRIGGER_TYPES = [GateTriggers, ToggleTriggers, OneShotTriggers]
 
 
 class Action(object):
+    """
+    Action base class
+    """
+
     def __init__(self):
         print("set name to ", self.name)
 
@@ -59,8 +74,9 @@ class Action(object):
 
 
 class SendOSC(Action):
-    def __init__(self):
+    def __init__(self, settings=None):
         Action.__init__(self)
+        self.settings = settings
 
     def start_action(self, source):
         """
