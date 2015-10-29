@@ -3,12 +3,15 @@ import collections
 from kivy.adapters.dictadapter import DictAdapter
 from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty
+from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.uix.floatlayout import FloatLayout
 
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.listview import ListView
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.uix.slider import Slider
@@ -46,12 +49,9 @@ class ActionPopup(Popup):
         self.on_change_action = on_change_action
         super(ActionPopup, self).__init__(*args, **kwargs)
         adapter = self.ids['items'].adapter
-        #adapter.select_data_item(midi_port) ## TODO - IS this setting the selection ??
         adapter.bind(on_selection_change=self.select_action)
 
     def select_action(self, adapter, *args, **kwargs):
-        print "select action "
-        pass
         if len(adapter.selection) and self.on_change_action is not None:
             self.on_change_action(adapter.selection[0].text)
             self.dismiss()
@@ -90,6 +90,7 @@ class PerformanceScreen(Screen):
         self.ids['toggle_midi_popup'].text = "> %s" % portname
 
 
+# Bottom Bar components
 class ActionTitleBar(BoxLayout):
     pass
 
@@ -132,8 +133,40 @@ class SendOSCAction(ActionEventWidget):
         print("build")
 
 
+# Side Bar
 class ActionEditor(FloatLayout):
     pass
+
+
+
+class ActionList(ListView):
+    pass
+
+
+class ActionSideBar(Accordion):
+    model = ObjectProperty(None)
+
+    def __init__(self, *args, **kwargs):
+        Accordion.__init__(self, *args, **kwargs)
+        self.action_lists = []
+        #self.on_select(self.on_blah)
+
+    def on_model(self, widget, model):
+        """
+        Now model is specified, sort out what types actions to add
+        """
+        for action_list in self.action_lists:
+            self.remove_widget(action_list)
+
+        for action_type in model.action_types:
+            item = AccordionItem(title='%ss' % action_type.name)
+            item.add_widget(Label(text='Very big content\n' * 10))  ## TODO replace with actual actions
+            self.action_lists.append(item)
+            self.add_widget(item)
+
+    def select(self, item):
+        print item
+        super(ActionSideBar, self).select(item)
 
 
 class EditScreen(Screen):
@@ -172,7 +205,7 @@ class EditScreen(Screen):
 
     def update_model(self, widget, model):
         #self.ids['model'].value = model
-        print("model changed", widget, model)
+        print("ES: model changed", widget, model)
 
 
 

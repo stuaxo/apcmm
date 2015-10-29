@@ -40,7 +40,7 @@
 
         ListView:
             id: items
-            size_hint: 1,.8
+            #size_hint: 1,.8
             adapter:
                 mk_dictadapter(
                 data=app.midi_devices,
@@ -173,6 +173,19 @@
             name: "End"
 
 
+<ActionList>:
+    # list of actions
+    id: action_stack
+    size_hint: 1,.8
+    pos_hint: {'x': 0, 'top': 1}
+    adapter:
+        la.ListAdapter(
+        data=["Smiley Control",],
+        cls=ListItemButton,
+        allow_empty_selection=True,
+        selection_mode='single',
+        )
+
 <EditScreen>:
     id: edit
     model: app.virtual_apc
@@ -236,16 +249,12 @@
                                 Label:
                                     text: "actions"
                                     pos_hint: {'x': 0, 'y': 0}
-                                ListView:
-                                    id: action_stack
-                                    size_hint: 1,.8
+                                    color: 0, 0, 0, 1
+                                ActionSideBar:
+                                    id: action_sidebar
+                                    model: root.model
+                                    orientation: "vertical"
                                     pos_hint: {'x': 0, 'top': 1}
-                                    adapter:
-                                        la.ListAdapter(
-                                        data=["Smiley Control",],
-                                        cls=ListItemButton,
-                                        allow_empty_selection=True,
-                                        selection_mode='single',
-                                        )
+
                     ActionEditor:
                         id: bottom_bar

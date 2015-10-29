@@ -178,7 +178,10 @@ class APCMiniModel(with_metaclass(Handler)):
         self.note_buttons = OrderedDict()     # indexed by note
         self.control_sliders = OrderedDict()  # indexed by control id
 
-        self.action_types = set()             # action sources
+        #self.actions = {}                     # { SourceKlass: [actions]
+
+        self.action_types = set()
+
         # TODO - find out about control buttons
 
         # 8x8 grid of clip launch buttons, and column of
