@@ -1,4 +1,5 @@
 import argparse
+import collections
 import logging
 import mido
 
@@ -43,6 +44,15 @@ class ApcMiniEmu(App):
     def profile_model(self):
         print "return profile model", self.m
         return self.m
+
+    @property
+    def midi_devices(self):
+        devices = collections.OrderedDict()
+        devices[None] = ApcMiniEmu.DISCONNECTED
+        for device in mido.get_ioport_names():
+            devices[device] = device
+
+        return devices
 
     def connect_midi(self, portname):
         if self.midi_port:

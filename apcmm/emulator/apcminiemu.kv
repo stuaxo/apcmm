@@ -8,8 +8,11 @@
 #:import TextInput kivy.uix.textinput.TextInput
 #:import la kivy.adapters.listadapter
 
+#:import da kivy.adapters.dictadapter
+
 #:import APCMiniModel apcmm.api.model.APCMiniModel
 #:import APCMiniWidget apcmm.emulator.widgets.APCMiniWidget
+#:import mk_dictadapter apcmm.emulator.widgets.mk_dictadapter
 
 <ClipButton>:
     Image:
@@ -27,7 +30,7 @@
 
 
 <MidiChooserPopup>:
-    id: midipopup
+    id: midi_popup
     size_hint: .5, .5
     auto_dismiss: True
     title: 'Connect To Midi'
@@ -38,15 +41,14 @@
         ListView:
             id: items
             size_hint: 1,.8
-
             adapter:
-                la.ListAdapter(
-                data=[app.DISCONNECTED] + mido.get_ioport_names(),
+                mk_dictadapter(
+                data=app.midi_devices,
+                sorted_keys=[1],
                 cls=ListItemButton,
                 allow_empty_selection=True,
                 selection_mode='single',
                 )
-
         Button:
             text: 'Cancel'
             on_press: root.dismiss()
@@ -212,7 +214,7 @@
                             ## thing: root.blah ## TODO
                         BoxLayout:
                             id: side_bar
-                            size_hint_x: 0.3
+                            size_hint_x: 0.4
                             orientation: "vertical"
                             canvas.before:
                                 Color:

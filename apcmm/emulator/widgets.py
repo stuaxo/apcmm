@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import collections
+from kivy.adapters.dictadapter import DictAdapter
 from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -14,6 +16,27 @@ from kivy.uix.slider import Slider
 import apcmm.api as api
 import apcmm.emulator.buttons as buttons
 import apcmm.api.actions as actions
+
+
+def mk_dictadapter(data=None, cls=None, *args, **kwargs):
+    """
+    Create a DictAdapter where .id of the selected item
+    will be the the items key
+    """
+    items = data.items()
+
+    def _args_converter(i, value):
+        """ get key """
+        key = items[i][0]
+        return {"id": key, "text": value}
+
+    return DictAdapter(
+        data=data,
+        args_converter=_args_converter,
+        cls=cls,
+        *args,
+        **kwargs
+    )
 
 
 class ActionPopup(Popup):
@@ -33,7 +56,6 @@ class ActionPopup(Popup):
             self.dismiss()
 
 
-
 class MidiChooserPopup(Popup):
     def __init__(self, on_change_midi=None, midi_port=None, *args, **kwargs):
         # TODO - select current midi device
@@ -46,8 +68,9 @@ class MidiChooserPopup(Popup):
 
     def select_midi_device(self, adapter, *args, **kwargs):
         if len(adapter.selection) and self.on_change_midi is not None:
-            self.on_change_midi(adapter.selection[0].text)
+            self.on_change_midi(adapter.selection[0].id)
             self.dismiss()
+
 
 class PerformanceScreen(Screen):
     model = ObjectProperty()
