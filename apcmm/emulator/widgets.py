@@ -28,7 +28,8 @@ def mk_dictadapter(data=None, cls=None, *args, **kwargs):
     def _args_converter(i, value):
         """ get key """
         key = items[i][0]
-        return {"id": key, "text": value}
+        d = {"id": key, "text": value, "height": 30}
+        return d
 
     return DictAdapter(
         data=data,
