@@ -11,7 +11,7 @@ from mnd.handler import Handler
 
 from enum import Enum
 
-from actions import EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE, EVENTS_CHANGE, ControlSource, ButtonSource
+from actions import EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE, EVENT_CHANGE, ControlSource, ButtonSource
 
 RECV_MIDI = "APC MINI MIDI 1"
 SEND_MIDI = "APC MINI MIDI 1"
@@ -163,7 +163,11 @@ CONTROL_CHANGE = "change"
 
 class APCMiniModel(with_metaclass(Handler)):
     # TODO - is model something like 'layout'
-    def __init__(self):
+    def __init__(self, mappings=None):
+        """
+        :param mappings: sequence of Mapping Objects or None
+        :return:
+        """
         self.observers = []
 
         # setup dicts of the widgets in the grid
@@ -179,7 +183,10 @@ class APCMiniModel(with_metaclass(Handler)):
         self.note_buttons = OrderedDict()     # indexed by note
         self.control_sliders = OrderedDict()  # indexed by control id
 
-        self.mappings = {}                    # { name: [actions]
+        if mappings is None:
+            self.mappings = {}                # { name: [actions]
+        else:
+            self.mappings = {mapping.name: mapping for mapping in mappings}
 
         self.action_types = set()
 
@@ -236,6 +243,11 @@ class APCMiniModel(with_metaclass(Handler)):
     def add_observer(self, o):
         self.observers.append(o)
 
+    def _dispatch_to_mappings(self, source, event):
+        print("_dispatch_to_mappings ", self.mappings)
+        for mapping in self.mappings:
+            print("dispatch to ", mapping)
+
     def midi_control_event(self, name, msg):
         assert name == "control_change", "Unknown midi event %s" % name
         ctl = self.control_sliders[msg.control]
@@ -243,6 +255,8 @@ class APCMiniModel(with_metaclass(Handler)):
         for ob in self.observers:
             m = getattr(ob, "on_%s" % name, None)
             m(self, ctl, msg.value)
+
+        self._dispatch_to_mappings(ctl, name)
 
     def midi_button_event(self, btn_t, event_t, msg):
         """
@@ -258,6 +272,8 @@ class APCMiniModel(with_metaclass(Handler)):
         for ob in self.observers:
             m = getattr(ob, "on_%s" % event, None)
             m(self, btn)
+
+        self._dispatch_to_mappings(btn, event)
 
     ### handlers for midi data from APC    
     @midi.handle(dict(type="note_on", note__in=Button.CLIP))

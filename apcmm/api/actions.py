@@ -12,7 +12,7 @@ Source - a collection of triggers, ie PRESS, RELEASE - TODO - consider merging i
 EVENT_PRESS = "press"
 EVENT_LONG_PRESS = "long_press"
 EVENT_RELEASE = "release"
-EVENTS_CHANGE = "change"
+EVENT_CHANGE = "change"
 
 ACTIONS = {}   # { name: klass }
 TRIGGERS = {}  # { name: klass }
@@ -45,7 +45,7 @@ class ButtonSource(object):
 
 class ControlSource(object):
     name = "control"
-    triggers = frozenset({EVENTS_CHANGE})
+    triggers = frozenset({EVENT_CHANGE})
 
 
 # ActionTriggers - different ways of triggering actions
@@ -71,7 +71,7 @@ class OneShot(ActionTriggers):
     def __init__(self):
         ActionTriggers.__init__(
             self,
-            start=[EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE, EVENTS_CHANGE]
+            start=[EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE, EVENT_CHANGE]
         )
 
 

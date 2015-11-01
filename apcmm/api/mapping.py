@@ -1,6 +1,7 @@
 from yaml import load, dump
 from apcmm.api.actions import Action
 
+from mnd.dispatch import Dispatcher
 
 class Mapping(object):
     """
@@ -29,8 +30,18 @@ class Mapping(object):
         self.sources = sources
         self.action = action
 
-        # TODO - create dispatchers to dispatch events to the actions
-        self.dispatchers = []
+        d = Dispatcher()
+        for source in sources:
+            #bind_function()
+            pass
+
+        self.dispatchers = [d]
+
+    def dispatch_event(self):
+        pass
+    #def dispatch(self, *args, **kwargs):
+    #    for d in self.dispatchers:
+    #        d.dispatch(*args, **kwargs)
 
     @staticmethod
     def from_dict(d):
@@ -60,11 +71,11 @@ def load_mappings(filename="default.yaml"):
     """
 
     # TODO
-    mappings = [
+    _mappings = [
         {
             "name": "Smiley Control",
             "sources": [{
-                "type": "control",  # this will be ANY slider
+                "type": "slider",  # this will be ANY slider
             }],
             "events": [{
                 "type": "control_change",  # recieve any control change
@@ -76,9 +87,11 @@ def load_mappings(filename="default.yaml"):
         }
     ]
 
-    print("load mappings...")
-    for mapping in mappings:
-        print Mapping.from_dict(mapping)
+    mappings = []
+    for mapping in _mappings:
+        mappings.append(Mapping.from_dict(mapping))
+
+    return mappings
 
 def save_mappings(mappings, filename="default.yaml"):
     """

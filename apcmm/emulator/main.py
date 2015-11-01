@@ -26,12 +26,13 @@ class ApcMiniEmu(App):
     virtual_apc = ObjectProperty()
 
     def __init__(self, first_screen=None):
-        self.m = model.APCMiniModel()
         self.first_screen = first_screen
         self.midi_port = None
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
-        self.virtual_apc = model.APCMiniModel()
-        load_mappings(self.profile_name)
+
+        mappings = load_mappings()
+        self.virtual_apc = model.APCMiniModel(mappings=mappings)
+
         App.__init__(self)
 
     def build(self):
@@ -42,8 +43,9 @@ class ApcMiniEmu(App):
             sm.current = self.first_screen
         return sm
 
-    def set_virtual_apc(self, m):
-        print("VIRTUAL_APC ", m)
+    def set_virtual_apc(self, virtual_apc):
+        self.virtual_apc = virtual_apc
+        print("VIRTUAL_APC ", self.virtual_apc)
 
     @property
     def profile_list(self):
@@ -51,13 +53,13 @@ class ApcMiniEmu(App):
 
     @property
     def profile_model(self):
-        print "return profile model", self.m
-        return self.m
+        print "return profile model", self.virtual_apc
+        return self.virtual_apc
 
     @profile_model.setter
     def profile_model(self, model):
         print("Set model")
-        self.m = model
+        self.virtual_apc = model
 
     @property
     def midi_devices(self):
