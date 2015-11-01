@@ -239,6 +239,7 @@ class APCMiniModel(with_metaclass(Handler)):
     def midi_control_event(self, name, msg):
         assert name == "control_change", "Unknown midi event %s" % name
         ctl = self.control_sliders[msg.control]
+        print("send %s to %d observers" % (name, len(self.observers)))
         for ob in self.observers:
             m = getattr(ob, "on_%s" % name, None)
             m(self, ctl, msg.value)
@@ -251,8 +252,9 @@ class APCMiniModel(with_metaclass(Handler)):
         """
         assert btn_t in BUTTON_TYPES, "Unknown midi button event %s" % btn_t
         btn = self.note_buttons[msg.note]
-        btn.state = ev_type
+        btn.state = event_t
         event = "%s_%s" % (btn_t, event_t)
+        print("send %s to %d observers" % (event, len(self.observers)))
         for ob in self.observers:
             m = getattr(ob, "on_%s" % event, None)
             m(self, btn)

@@ -29,6 +29,9 @@ class Mapping(object):
         self.sources = sources
         self.action = action
 
+        # TODO - create dispatchers to dispatch events to the actions
+        self.dispatchers = []
+
     @staticmethod
     def from_dict(d):
         """ construct Mapping from dict """
