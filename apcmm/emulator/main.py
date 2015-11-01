@@ -1,6 +1,7 @@
 import argparse
 import collections
 import logging
+from kivy.properties import ObjectProperty
 import mido
 
 from kivy.app import App
@@ -20,9 +21,9 @@ class ApcMiniEmu(App):
     DISCONNECTED = "Disconnected"
     DEFAULT_PROFILE = "default"
     virtual_apc = model.APCMiniModel()  # singleton for kv lang
-    m = model.APCMiniModel()
 
     def __init__(self, first_screen=None):
+        self.m = model.APCMiniModel()
         self.first_screen = first_screen
         self.midi_port = None
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE

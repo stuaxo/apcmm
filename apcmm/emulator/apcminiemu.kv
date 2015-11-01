@@ -69,7 +69,8 @@
 
             adapter:
                 la.ListAdapter(
-                data=[action.get_name() for action in actions.ACTIONS],
+                #data=[action.get_name() for action in actions.ACTIONS],
+                data = actions.ACTIONS.keys(),
                 cls=ListItemButton,
                 allow_empty_selection=True,
                 selection_mode='single',
@@ -189,6 +190,7 @@
 <EditScreen>:
     id: edit
     model: app.virtual_apc
+
     FloatLayout:
         ActionBar:
             size_hint: 1,0.1
@@ -215,7 +217,7 @@
             do_default_tab: False
             tab_width: self.parent.width / (len(self.tab_list) + 1)
             size_hint_y: 0.9
-            tab_pos: "left_top"
+            tab_pos: "left_bottom"
             TabbedPanelItem:
                 text: "Mapping"
                 BoxLayout:
@@ -236,21 +238,31 @@
                                     # self here refers to the widget i.e BoxLayout
                                     pos: self.pos
                                     size: self.size
-                            Button:
-                                id: add_action
-                                text: "> Add"
-                                size_hint: 0.3, 0.1
-                                pos_hint: {"top": 1, "left": 0}
-                                on_release: root.toggle_add_action_dropdown(self)
+                            BoxLayout:
+                                size_hint_y: 0.1
+                                Button:
+                                    id: add_action
+                                    text: "+ Group"
+                                    #size_hint: 0.5, 0.1
+                                    #pos_hint: {"top": 0, "left": 0}
+                                    on_release: root.toggle_add_action_dropdown(self)
+                                Button:
+                                    id: add_action
+                                    text: "+ Action"
+                                    #size_hint: 0.5, 0.1
+                                    #pos_hint: {"top": 1, "left": 0}
+                                    on_release: root.toggle_add_action_dropdown(self)
                             FloatLayout:
                                 id: actions
                                 orientation: "vertical"
-                                pos_hint: {"top": 1}
-                                size_hint_y: 0.9
+                                #pos_hint: {"top": 0.8}
+                                #size_hint_y: 0.8
                                 Label:
                                     text: "actions"
                                     pos_hint: {'x': 0, 'y': 0}
-                                    color: 0, 0, 0, 1
+                                    color: 0.7, 0.7, 0.7, 1
+                                    font_size: 20
+                                    id: side_bar_text
                                 ActionSideBar:
                                     id: action_sidebar
                                     model: root.model

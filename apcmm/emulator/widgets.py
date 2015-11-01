@@ -52,6 +52,7 @@ class ActionPopup(Popup):
         adapter.bind(on_selection_change=self.select_action)
 
     def select_action(self, adapter, *args, **kwargs):
+        print("select action...")
         if len(adapter.selection) and self.on_change_action is not None:
             self.on_change_action(adapter.selection[0].text)
             self.dismiss()
@@ -159,8 +160,8 @@ class ActionSideBar(Accordion):
             self.remove_widget(action_list)
 
         for action_type in model.action_types:
-            item = AccordionItem(title='%ss' % action_type.name)
-            item.add_widget(Label(text='Very big content\n' * 10))  ## TODO replace with actual actions
+            item = AccordionItem(title='%ss 1' % action_type.name)
+            #item.add_widget(Label(text='Very big content\n' * 10))  ## TODO replace with actual actions
             self.action_lists.append(item)
             self.add_widget(item)
 
@@ -177,7 +178,7 @@ class EditScreen(Screen):
     def __init__(self, *args, **kwargs):
         Screen.__init__(self, *args, **kwargs)
         self.actions_dropdown = None
-        self.bind(model=self.update_model)
+        #self.bind(model=self.update_model)
         #self.model = api.model.APCMiniModel()
 
     def toggle_add_action_dropdown(self, btn):
@@ -203,7 +204,7 @@ class EditScreen(Screen):
             print(e)
         self.ids['toggle_midi_popup'].text = "> %s" % app.portname
 
-    def update_model(self, widget, model):
+    def on_model(self, widget, model):
         #self.ids['model'].value = model
         print("ES: model changed", widget, model)
 

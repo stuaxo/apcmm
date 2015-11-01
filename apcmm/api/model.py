@@ -162,6 +162,7 @@ CONTROL_CHANGE = "change"
 
 
 class APCMiniModel(with_metaclass(Handler)):
+    # TODO - is model something like 'layout'
     def __init__(self):
         self.observers = []
 
@@ -178,7 +179,7 @@ class APCMiniModel(with_metaclass(Handler)):
         self.note_buttons = OrderedDict()     # indexed by note
         self.control_sliders = OrderedDict()  # indexed by control id
 
-        #self.actions = {}                     # { SourceKlass: [actions]
+        self.mappings = {}                    # { name: [actions]
 
         self.action_types = set()
 
@@ -310,9 +311,7 @@ class APCMiniObserver(object):
         pass
 
     def on_clip_press(self, source, btn):
-        """
-        clip button was pressed
-        """
+        """ clip button was pressed """
         pass
 
     def on_clip_release(self, source, btn):
