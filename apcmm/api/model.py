@@ -11,7 +11,7 @@ from mnd.handler import Handler
 
 from enum import Enum
 
-from actions import TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE, TRIGGER_CHANGE, ControlSource, ButtonSource
+from actions import EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE, EVENTS_CHANGE, ControlSource, ButtonSource
 
 RECV_MIDI = "APC MINI MIDI 1"
 SEND_MIDI = "APC MINI MIDI 1"
@@ -69,7 +69,7 @@ ControlColors.default = ControlColors.grey
 
 class GridButton(object):
 
-    triggers = ButtonSource
+    triggers = ButtonSource   # events button can trigger
 
     action_fields = ["type", "n", "note", "x", "y"]
 
@@ -117,7 +117,7 @@ class GridButton(object):
 
 class GridSlider(object):
 
-    triggers = ControlSource
+    triggers = ControlSource   # events control can trigger
 
     action_fields = ["type", "n", "control", "x", "y", "value"]
 

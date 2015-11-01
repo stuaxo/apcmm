@@ -9,10 +9,10 @@ Source - a collection of triggers, ie PRESS, RELEASE - TODO - consider merging i
 """
 
 
-TRIGGER_PRESS = "press"
-TRIGGER_LONG_PRESS = "long_press"
-TRIGGER_RELEASE = "release"
-TRIGGER_CHANGE = "change"
+EVENT_PRESS = "press"
+EVENT_LONG_PRESS = "long_press"
+EVENT_RELEASE = "release"
+EVENTS_CHANGE = "change"
 
 ACTIONS = {}   # { name: klass }
 TRIGGERS = {}  # { name: klass }
@@ -39,13 +39,13 @@ def register_trigger(klass):
 
 
 class ButtonSource(object):
-    name = "Button"
-    triggers = frozenset({TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE})
+    name = "button"
+    triggers = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
 
 
 class ControlSource(object):
-    name = "Control"
-    triggers = frozenset({TRIGGER_CHANGE})
+    name = "control"
+    triggers = frozenset({EVENTS_CHANGE})
 
 
 # ActionTriggers - different ways of triggering actions
@@ -71,7 +71,7 @@ class OneShot(ActionTriggers):
     def __init__(self):
         ActionTriggers.__init__(
             self,
-            start=[TRIGGER_PRESS, TRIGGER_LONG_PRESS, TRIGGER_RELEASE]
+            start=[EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE, EVENTS_CHANGE]
         )
 
 
@@ -82,16 +82,16 @@ class Gate(ActionTriggers):
     def __init__(self):
         ActionTriggers.__init__(
             self,
-            start=[TRIGGER_PRESS, TRIGGER_LONG_PRESS],
-            end=[TRIGGER_RELEASE])
+            start=[EVENT_PRESS, EVENT_LONG_PRESS],
+            end=[EVENT_RELEASE])
 
 
 class Toggle(ActionTriggers):
     def __init__(self):
         ActionTriggers.__init__(
             self,
-            start=[TRIGGER_PRESS, TRIGGER_LONG_PRESS],
-            end=[TRIGGER_PRESS, TRIGGER_LONG_PRESS])
+            start=[EVENT_PRESS, EVENT_LONG_PRESS],
+            end=[EVENT_PRESS, EVENT_LONG_PRESS])
 
 
 register_trigger(Gate)
@@ -114,7 +114,7 @@ class Action(object):
 
     @staticmethod
     def from_dict(d):
-        # construct Action from dict
+        """ construct Action from dict """
         try:
             args = dict(**d)
             classname = args.pop("class")
@@ -125,24 +125,16 @@ class Action(object):
 
 
 class SendOSC(Action):
-    def __init__(self, start=None, end=None, path=None):
+    def __init__(self, path=None):
         Action.__init__(self)
-        self.start = start
-        self.end = end
         self.path = path
 
-    def start_action(self, source):
+    def run(self, source, event):
         """
         :param source: what triggered the action
         """
         print("send an osc message")
         print source.note
-
-    def stop_action(self, source):
-        """
-        :param source: what triggered the action
-        """
-        print("stop ")
-
+        print self.path
 
 register_action(SendOSC)

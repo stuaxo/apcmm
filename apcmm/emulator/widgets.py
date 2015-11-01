@@ -127,6 +127,7 @@ class ActionEventWidget(BoxLayout):
 
 
 class SendOSCAction(ActionEventWidget):
+    #### TODO - don't think I need this..... ????
     def __init__(self, *args, **kwargs):
         ActionEventWidget.__init__(self, *args, **kwargs)
 

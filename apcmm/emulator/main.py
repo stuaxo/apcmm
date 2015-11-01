@@ -7,6 +7,8 @@ import mido
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 
+from apcmm.api.mapping import load_mappings
+
 import signal
 
 import apcmm.api.model as model
@@ -20,13 +22,16 @@ app = None
 class ApcMiniEmu(App):
     DISCONNECTED = "Disconnected"
     DEFAULT_PROFILE = "default"
-    virtual_apc = model.APCMiniModel()  # singleton for kv lang
+
+    virtual_apc = ObjectProperty()
 
     def __init__(self, first_screen=None):
         self.m = model.APCMiniModel()
         self.first_screen = first_screen
         self.midi_port = None
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
+        self.virtual_apc = model.APCMiniModel()
+        load_mappings(self.profile_name)
         App.__init__(self)
 
     def build(self):
@@ -37,6 +42,9 @@ class ApcMiniEmu(App):
             sm.current = self.first_screen
         return sm
 
+    def set_virtual_apc(self, m):
+        print("VIRTUAL_APC ", m)
+
     @property
     def profile_list(self):
         return [ApcMiniEmu.DEFAULT_PROFILE, "test_profile"]
@@ -45,6 +53,11 @@ class ApcMiniEmu(App):
     def profile_model(self):
         print "return profile model", self.m
         return self.m
+
+    @profile_model.setter
+    def profile_model(self, model):
+        print("Set model")
+        self.m = model
 
     @property
     def midi_devices(self):
@@ -59,13 +72,14 @@ class ApcMiniEmu(App):
         if self.midi_port:
             self.midi_port.close()
 
-        def callback(msg):
-            pass
+        #def callback(msg):
+        #    print(msg)
+        #    model.midi.dispatch(msg)
 
         if portname is None:
             self.midi_port = None
         else:
-            self.midi_port = mido.open_ioport(portname, callback=callback, autoreset=True)
+            self.midi_port = mido.open_ioport(portname, callback=model.midi.dispatch, autoreset=True)
 
     @property
     def portname(self):
