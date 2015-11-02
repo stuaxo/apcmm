@@ -105,7 +105,6 @@ class Action(object):
     """
 
     def __init__(self):
-        #print("set name to ", self.name)
         pass
 
     @classmethod
@@ -129,12 +128,14 @@ class SendOSC(Action):
         Action.__init__(self)
         self.path = path
 
-    def run(self, source, event):
+    def run(self, source, event, data):
         """
-        :param source: what triggered the action
+        :param source: control that triggered the action
         """
         print("send an osc message")
-        print source.note
+        print 'S: ', source
+        print 'E: ', event
+        print 'D:', data
         print self.path
 
 register_action(SendOSC)

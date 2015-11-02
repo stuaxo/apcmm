@@ -1,3 +1,4 @@
+from mnd.handler import bind_instancemethod
 from yaml import load, dump
 from apcmm.api.actions import Action
 
@@ -8,7 +9,7 @@ class Mapping(object):
     A mapping, is the link between sources (buttons / controls)
     and actions.
     """
-    def __init__(self, name, sources, action):
+    def __init__(self, name, sources, events, action):
         """
         :param sources: list of source filters
         :param action: class and params
@@ -32,16 +33,17 @@ class Mapping(object):
 
         d = Dispatcher()
         for source in sources:
-            #bind_function()
-            pass
+            for event in events:
+                bind_instancemethod(action.run, d, source=source, event=event) ## accept_args
 
         self.dispatchers = [d]
 
-    def dispatch_event(self):
-        pass
-    #def dispatch(self, *args, **kwargs):
-    #    for d in self.dispatchers:
-    #        d.dispatch(*args, **kwargs)
+    def dispatch_event(self, source, event, data):
+        for d in self.dispatchers:
+            print d
+            print type(d)
+            called = d.dispatch(source=source, event=event, data=data)
+            print "called ", called
 
     @staticmethod
     def from_dict(d):
@@ -51,14 +53,16 @@ class Mapping(object):
         action_params = d.pop("action")
         action = Action.from_dict(action_params)
         sources = d.get("sources", list())
+        events = d.get("events", list())
 
-        mapping = Mapping(name, sources, action)
+        mapping = Mapping(name, sources, events, action)
         return mapping
 
     def __dict__(self):
         d = {
             "name": self.name,
             "sources": self.sources,
+            "events": self.events,
             "action": dict(self.action),
         }
         return d
@@ -78,11 +82,11 @@ def load_mappings(filename="default.yaml"):
                 "type": "slider",  # this will be ANY slider
             }],
             "events": [{
-                "type": "control_change",  # recieve any control change
+                "type": "control_change",  # receive any control change
             }],
             "action": {
                 "class": "SendOSC",
-                "path": "/vis/smilies/{control.id}/amount"
+                "path": "/vis/smilies/{source.id}/amount"
             },
         }
     ]
