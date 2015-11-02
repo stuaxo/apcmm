@@ -224,11 +224,10 @@ class WidgetUpdater(APCMiniObserver):
         APCMiniObserver.__init__(self)
 
     def on_control_msg(self, event, ctl, msg):
-        print("midi for control ", ctl, msg)
         self.controls[ctl.control].value = msg.value
 
-    def on_button_msg(self, event, btn, msg):
-        print("midi for button ", btn, msg)
+    #def on_button_msg(self, event, btn, msg):
+    #    pass
 
 
 class APCMiniWidget(GridLayout):
