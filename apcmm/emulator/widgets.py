@@ -17,6 +17,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.slider import Slider
 
 import apcmm.api as api
+from apcmm.api.model import SLIDER, APCMiniObserver
 import apcmm.emulator.buttons as buttons
 import apcmm.api.actions as actions
 
@@ -211,6 +212,25 @@ class EditScreen(Screen):
 
 
 
+class WidgetUpdater(APCMiniObserver):
+
+    def __init__(self, buttons, controls):
+        """
+        :param buttons: dict {note:button widget}
+        :param controls: dict {id:control widget}
+        """
+        self.buttons = buttons
+        self.controls = controls
+        APCMiniObserver.__init__(self)
+
+    def on_control_msg(self, event, ctl, msg):
+        print("midi for control ", ctl, msg)
+        self.controls[ctl.control].value = msg.value
+
+    def on_button_msg(self, event, btn, msg):
+        print("midi for button ", btn, msg)
+
+
 class APCMiniWidget(GridLayout):
     """
     Widget holding all the controls on a real APC Mini.
@@ -219,21 +239,29 @@ class APCMiniWidget(GridLayout):
     sliders are in a dict indexed by control
     """
 
+    model = ObjectProperty()
+
     def __init__(self, *args, **kwargs):
         GridLayout.__init__(self, cols=9, rows=10)   # chuck all the controls into one grid
-        model = api.model.APCMiniModel()
+
+        model = App.get_running_app().virtual_apc
+        buttons = {}
+        controls = {}
         for widget_data in model.grid.values():
             widget = create_widget(widget_data)
             if widget:
                 self.add_widget(widget)
+                if widget_data.type == SLIDER:
+                    controls[widget_data.control] = widget
+                else:
+                    buttons[widget_data.note] = widget
+
+        # WidgetObserver will update gui widgets on midi events
+        widget_updater = WidgetUpdater(buttons, controls)
+        model.observers.append(widget_updater)
+
+        self.widget_updater = widget_updater
         self.model = model
-
-        #self.bind(thing=self.set_events)
-
-    def set_events(self, *args, **kwargs):
-        print "set_events"
-        print "", args
-        print "", kwargs
 
 
 def create_widget(widget_data):

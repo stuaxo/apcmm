@@ -187,12 +187,15 @@ CONTROL_CHANGE = "change"
 
 class APCMiniModel(with_metaclass(Handler)):
     # TODO - is model something like 'layout'
-    def __init__(self, mappings=None):
+    def __init__(self, mappings=None, observers=None):
         """
         :param mappings: sequence of Mapping Objects or None
         :return:
         """
-        self.observers = []
+        if observers is None:
+            self.observers = []
+        else:
+            self.observers = list(observers[:])
 
         # setup dicts of the widgets in the grid
         # so it's easy to retrieve them later 
@@ -276,8 +279,10 @@ class APCMiniModel(with_metaclass(Handler)):
     def midi_control_event(self, name, msg):
         assert name == "control_change", "Unknown midi event %s" % name
         ctl = self.control_sliders[msg.control]
-        print("send %s to %d observers" % (name, len(self.observers)))
         for ob in self.observers:
+            m = getattr(ob, "on_control_msg", None)
+            m(self, ctl, msg)
+
             m = getattr(ob, "on_%s" % name, None)
             m(self, ctl, msg.value)
 
@@ -287,13 +292,15 @@ class APCMiniModel(with_metaclass(Handler)):
         """
         :param btn_t: button type (value in BUTTON_TYPES)
         :param ev_type: PRESS, RELEASE or HOLD
-        :msg: mido midi msg
+        :param msg: mido midi msg
         """
         assert btn_t in BUTTON_TYPES, "Unknown midi button event %s" % btn_t
         btn = self.note_buttons[msg.note]
         event = btn.event(event_t)
-        print("send %s to %d observers" % (event, len(self.observers)))
         for ob in self.observers:
+            m = getattr(ob, "on_button_msg", None)
+            m(self, btn, msg)
+
             m = getattr(ob, "on_%s" % event, None)
             m(self, btn)
 
@@ -353,7 +360,6 @@ class APCMiniObserver(object):
         pass
 
     def on_clip_press(self, source, btn):
-        """ clip button was pressed """
         pass
 
     def on_clip_release(self, source, btn):
@@ -378,6 +384,12 @@ class APCMiniObserver(object):
         pass
 
     def on_control_change(self, source, ctl, value):
+        pass
+
+    def on_control_msg(self, btn, msg):
+        pass
+
+    def on_button_msg(self, btn, msg):
         pass
 
 
@@ -411,3 +423,10 @@ class APCMiniDebugObserver(APCMiniObserver):
 
     def on_control_change(self, source, ctl, value):
         print("control_change", ctl, value)
+
+    def on_control_msg(self, ctl, msg):
+        print("midi for control ", ctl, msg)
+
+    def on_button_msg(self, btn, msg):
+        print("midi for button ", btn, msg)
+

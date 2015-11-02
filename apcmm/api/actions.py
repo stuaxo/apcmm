@@ -135,7 +135,7 @@ class SendOSC(Action):
         print("send an osc message")
         print 'S: ', source
         print 'E: ', event
-        print 'D:', data
+        print 'D: ', data
         print self.path
 
 register_action(SendOSC)

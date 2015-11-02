@@ -40,10 +40,7 @@ class Mapping(object):
 
     def dispatch_event(self, source, event, data):
         for d in self.dispatchers:
-            print d
-            print type(d)
-            called = d.dispatch(source=source, event=event, data=data)
-            print "called ", called
+            d.dispatch(source=source, event=event, data=data)
 
     @staticmethod
     def from_dict(d):
