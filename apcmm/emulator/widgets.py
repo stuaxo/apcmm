@@ -117,27 +117,13 @@ class ActionEventWidget(BoxLayout):
         self.bind(action=self.update_action)
         self.name = name
         self.action = action
-        #self.bind(action_type=self.update_trigger)
-
-    # def update_trigger(self, widget, trigger):
-    #     assert trigger in ['start', 'end']
-    #     if trigger == 'start':
-    #         # press or long_press
-    #         ## TODO - read this from somewhere
-    #         self.ids['trigger'].text = 'press'
-    #     else:
-    #         # release
-    #         ## TODO - read this from somewhere
-    #         self.ids['trigger'].text = 'release'
 
     def update_name(self, widget, name):
         self.ids['action'].text = name
 
     def update_action(self, widget, action):
         self.ids['event'].text = action.event
-
-    #def update_name(self, widget, value):
-    #    self.ids['action'].text = value
+        # TODO - highlight all affected controls by
 
 
 class MappingEditor(FloatLayout):
