@@ -1,17 +1,14 @@
 from __future__ import print_function
 
-import weakref
-
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict, defaultdict
 
 from six import with_metaclass
-from six.moves import range
 from mnd.dispatch import Dispatcher
 from mnd.handler import Handler
-
 from enum import Enum
 
-from actions import ControlSource, ButtonSource, EVENT_PRESS, EVENT_RELEASE, EVENT_LONG_PRESS, EVENT_CHANGE
+from six.moves import range
+from actions import EVENT_PRESS, EVENT_RELEASE, EVENT_LONG_PRESS, EVENT_CHANGE
 
 RECV_MIDI = "APC MINI MIDI 1"
 SEND_MIDI = "APC MINI MIDI 1"
@@ -30,6 +27,16 @@ APC_BUTTON_EVENTS = [
     "scene_press",
     "scene_release"
     ]
+
+EVENT_SOURCES = {}  # ca;
+
+def register_source(klass):
+    """
+    Add an event emitter
+
+    :param klass: class that can emit events
+    """
+    EVENT_SOURCES[klass.__name__] = klass
 
 
 class Button:
@@ -69,7 +76,8 @@ ControlColors.default = ControlColors.grey
 
 class GridButton(object):
 
-    triggers = ButtonSource   # events button can trigger
+    ##triggers = ButtonSource   # events button can trigger
+    emits = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
 
     action_fields = ["type", "n", "note", "x", "y"]
 
@@ -132,7 +140,8 @@ class GridButton(object):
 
 class GridSlider(object):
 
-    triggers = ControlSource   # events control can trigger
+    ##triggers = ControlSource   # events control can trigger
+    emits = frozenset({EVENT_CHANGE})
 
     action_fields = ["type", "n", "control", "x", "y", "value"]
 
@@ -200,22 +209,24 @@ class APCMiniModel(with_metaclass(Handler)):
         # setup dicts of the widgets in the grid
         # so it's easy to retrieve them later 
 
-        self.clip_buttons = []                # indexed by scene no / note
-        self.control_buttons = OrderedDict()  # indexed by control no
-        self.scene_buttons = OrderedDict()    # indexed by scene no
+        self.clip_buttons = []                  # indexed by scene no / note
+        self.control_buttons = OrderedDict()    # indexed by control no
+        self.scene_buttons = OrderedDict()      # indexed by scene no
 
-        self.shift_button = None              # the shift button
-        self.grid = OrderedDict()             # indexed by (x, y)
+        self.shift_button = None                # the shift button
+        self.grid = OrderedDict()               # indexed by (x, y)
         
-        self.note_buttons = OrderedDict()     # indexed by note
-        self.control_sliders = OrderedDict()  # indexed by control id
+        self.note_buttons = OrderedDict()       # indexed by note
+        self.control_sliders = OrderedDict()    # indexed by control id
 
         if mappings is None:
-            self.mappings = {}                # { name: [actions]
+            self.mappings = []                  # { name: [actions]
         else:
-            self.mappings = {mapping.name: mapping for mapping in mappings}
+            #self.mappings = {mapping.name: mapping for mapping in mappings}
+            self.mappings = list(mappings)
 
-        self.action_types = set()
+        self.event_emitters = \
+            defaultdict(list) # { (klassname, w.type) : [widget_data, ...] }
 
         # TODO - find out about control buttons
 
@@ -255,7 +266,7 @@ class APCMiniModel(with_metaclass(Handler)):
         """
         Add widget with x, y
         """
-        self.action_types.add(w.triggers)
+        self.event_emitters[(w.__class__.__name__, w.type)].append(w)
         self.grid[(w.x, w.y)] = w
         self.note_buttons[w.note] = w
 
@@ -263,7 +274,7 @@ class APCMiniModel(with_metaclass(Handler)):
         """
         Add widget with x, y
         """
-        self.action_types.add(w.triggers)
+        self.event_emitters[(w.__class__.__name__, w.type)].append(w)
         self.grid[(w.x, w.y)] = w
         self.control_sliders[w.control] = w
 
@@ -345,88 +356,5 @@ class APCMiniModel(with_metaclass(Handler)):
         self.midi_control_event("control_change", msg)
 
 
-class APCMiniObserver(object):
-    """
-    Extend to recieve events from the APC Mini
-    """
-
-    def on_press(self, source, btb):
-        pass
-
-    def on_hold(self, source, btb):
-        pass
-
-    def on_release(self, source, btb):
-        pass
-
-    def on_clip_press(self, source, btn):
-        pass
-
-    def on_clip_release(self, source, btn):
-        pass
-
-    def on_control_press(self, source, btn):
-        pass
-
-    def on_control_release(self, source, btn):
-        pass
-
-    def on_shift_press(self, source, btn):
-        pass
-
-    def on_shift_release(self, source, btn):
-        pass
-
-    def on_scene_press(self, source, btn):
-        pass
-
-    def on_scene_release(self, source, btn):
-        pass
-
-    def on_control_change(self, source, ctl, value):
-        pass
-
-    def on_control_msg(self, btn, msg):
-        pass
-
-    def on_button_msg(self, btn, msg):
-        pass
-
-
-class APCMiniDebugObserver(APCMiniObserver):
-    """
-    Extend to receive events from the APC Mini
-    """
-    def on_clip_press(self, source, btn):
-        print("clip_press", btn)
-
-    def on_clip_release(self, source, btn):
-        print("clip_release", btn)
-
-    def on_control_press(self, source, btn):
-        print("control_press", btn)
-
-    def on_control_release(self, source, btn):
-        print("control_release", btn)
-
-    def on_shift_press(self, source, btn):
-        print("shift_press", btn)
-
-    def on_shift_release(self, source, btn):
-        print("shift_release", btn)
-
-    def on_scene_press(self, source, btn):
-        print("scene_press", btn)
-
-    def on_scene_release(self, source, btn):
-        print("scene_release", btn)
-
-    def on_control_change(self, source, ctl, value):
-        print("control_change", ctl, value)
-
-    def on_control_msg(self, ctl, msg):
-        print("midi for control ", ctl, msg)
-
-    def on_button_msg(self, btn, msg):
-        print("midi for button ", btn, msg)
-
+register_source(GridButton)
+register_source(GridSlider)

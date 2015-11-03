@@ -17,7 +17,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.slider import Slider
 
 import apcmm.api as api
-from apcmm.api.model import SLIDER, APCMiniObserver
+from apcmm.api.model import SLIDER
+from apcmm.api.observers import APCMiniObserver
 import apcmm.emulator.buttons as buttons
 import apcmm.api.actions as actions
 
@@ -148,11 +149,15 @@ class ActionList(ListView):
 
 class ActionSideBar(Accordion):
     model = ObjectProperty(None)
+    current_action = ObjectProperty(None)
 
     def __init__(self, *args, **kwargs):
         Accordion.__init__(self, *args, **kwargs)
-        self.action_lists = []
+        self.open_mapping = None
         #self.on_select(self.on_blah)
+
+        self.action_lists = []  ## TODO rename
+        self.action_buttons = {}
 
     def on_model(self, widget, model):
         """
@@ -160,16 +165,47 @@ class ActionSideBar(Accordion):
         """
         for action_list in self.action_lists:
             self.remove_widget(action_list)
+        self.action_buttons = {}
 
-        for action_type in model.action_types:
-            item = AccordionItem(title='%ss 1' % action_type.name)
-            #item.add_widget(Label(text='Very big content\n' * 10))  ## TODO replace with actual actions
-            self.action_lists.append(item)
-            self.add_widget(item)
+        # create index of mappings by class
+        mapping_idx = collections.defaultdict(list)
+        first_containing_item = None
+        first_action = None
 
-    def select(self, item):
-        print item
-        super(ActionSideBar, self).select(item)
+        for mapping in model.mappings:
+            for source in mapping.sources:
+                mapping_idx[source['class']].append(mapping)
+
+        for (klassname, typename), emitters in model.event_emitters.items():
+            pluralise = 's' if len(emitters) > 1 else ''
+            accordion_item = AccordionItem(title='%s%s' % (typename.capitalize(), pluralise))
+            accordion_item.bind(collapse=self.open_group)
+            self.action_lists.append(accordion_item)
+
+            for mapping in mapping_idx.get(klassname, list()):
+                action_button = Button(text=mapping.name)
+                self.action_buttons[action_button] = mapping.action
+                action_button.bind(on_release=self.select_action)
+                accordion_item.add_widget(action_button)
+                if not first_containing_item:
+                    first_containing_item = accordion_item
+                    first_action = mapping.action
+            self.add_widget(accordion_item)
+
+        if first_containing_item:
+            self.select(first_containing_item)
+        if first_action:
+            self.current_action = first_action
+
+    def open_group(self, item, collapse):
+        if collapse is False:
+            print item.title
+            ## TODO
+            ## self.open_mapping
+
+    def select_action(self, button):
+        action = self.action_buttons[button]
+        self.current_action = action
 
 
 class EditScreen(Screen):
@@ -257,7 +293,7 @@ class APCMiniWidget(GridLayout):
 
         # WidgetObserver will update gui widgets on midi events
         widget_updater = WidgetUpdater(buttons, controls)
-        model.observers.append(widget_updater)
+        model.add_observer(widget_updater)
 
         self.widget_updater = widget_updater
         self.model = model

@@ -38,14 +38,14 @@ def register_trigger(klass):
     TRIGGERS[klass] = klass.get_name()
 
 
-class ButtonSource(object):
-    name = "button"
-    triggers = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
-
-
-class ControlSource(object):
-    name = "control"
-    triggers = frozenset({EVENT_CHANGE})
+# class ButtonSource(object):
+#     name = "button"
+#     triggers = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
+#
+#
+# class ControlSource(object):
+#     name = "control"
+#     triggers = frozenset({EVENT_CHANGE})
 
 
 # ActionTriggers - different ways of triggering actions

@@ -76,7 +76,11 @@ def load_mappings(filename="default.yaml"):
         {
             "name": "Smiley Control",
             "sources": [{
-                "type": "slider",  # this will be ANY slider
+                "class": "GridSlider",  # GridSlider or GridButton
+                "controls": [{
+                    "type": "slider",  # obligatory
+                    "n__in": [1, 2, 3, 4]
+                }]
             }],
             "events": [{
                 "type": "control_change",  # receive any control change
