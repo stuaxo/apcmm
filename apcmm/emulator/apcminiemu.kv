@@ -117,11 +117,11 @@
             size_hint: 1, 0.9
 
 
-<ActionTitleBar>:
+<MappingTitleBar>:
     id: title
-    size_hint: 1, 0.9
+    size_hint: 1, 0.3
     Label:
-        text: "Edit Action"
+        text: "Edit Mapping"
         size_hint: 0.3, 1
     TextInput:
         text: "Smiley Control"
@@ -146,12 +146,12 @@
         text: ""
         width: 0.4
     Button:
-        id: trigger
+        id: event
         text: ""
         width: 0.4
 
-<ActionEditor>:
-    id: edit_action
+<MappingEditor>:
+    id: edit_mapping
     size_hint_y: 0.3
     canvas.before:
         Color:
@@ -163,15 +163,15 @@
     BoxLayout:
         id: bottom_bar
         orientation: "vertical"
-        ActionTitleBar:
-        ActionEventWidget:
-            id: start
-            action_type: "start"
-            name: "Start"
-        ActionEventWidget:
-            id: end
-            action_type: "end"
-            name: "End"
+        MappingTitleBar:
+#        ActionEventWidget:
+#            id: start
+#            action_type: "..."
+#            #name: "Start"
+#        ActionEventWidget:
+#            id: end
+#            action_type: "..."
+#            #name: "End"
 
 
 <ActionList>:
@@ -268,6 +268,7 @@
                                     model: root.model
                                     orientation: "vertical"
                                     pos_hint: {'x': 0, 'top': 1}
+                                    action_editor: bottom_bar
 
-                    ActionEditor:
+                    MappingEditor:
                         id: bottom_bar

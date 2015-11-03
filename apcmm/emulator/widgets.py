@@ -94,7 +94,7 @@ class PerformanceScreen(Screen):
 
 
 # Bottom Bar components
-class ActionTitleBar(BoxLayout):
+class MappingTitleBar(BoxLayout):
     pass
 
 
@@ -103,69 +103,96 @@ class ActionEventWidget(BoxLayout):
     one event in an action, e.g. 'start', 'stop'
     """
     name = ObjectProperty()
-    action_type = ObjectProperty()
+    action = ObjectProperty()
+    #action_type = ObjectProperty()
 
-    def __init__(self, *args, **kwargs):
-        BoxLayout.__init__(self, *args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     BoxLayout.__init__(self, *args, **kwargs)
+    #     self.bind(name=self.update_name)
+    #     #self.bind(action_type=self.update_trigger)
+
+    def __init__(self, name, action, *args, **kwargs):
+        BoxLayout.__init__(self, id=name, *args, **kwargs)
         self.bind(name=self.update_name)
-        self.bind(action_type=self.update_trigger)
+        self.bind(action=self.update_action)
+        self.name = name
+        self.action = action
+        #self.bind(action_type=self.update_trigger)
 
-    def update_trigger(self, widget, trigger):
-        assert trigger in ['start', 'end']
-        if trigger == 'start':
-            # press or long_press
-            ## TODO - read this from somewhere
-            self.ids['trigger'].text = 'press'
-        else:
-            # release
-            ## TODO - read this from somewhere
-            self.ids['trigger'].text = 'release'
+    # def update_trigger(self, widget, trigger):
+    #     assert trigger in ['start', 'end']
+    #     if trigger == 'start':
+    #         # press or long_press
+    #         ## TODO - read this from somewhere
+    #         self.ids['trigger'].text = 'press'
+    #     else:
+    #         # release
+    #         ## TODO - read this from somewhere
+    #         self.ids['trigger'].text = 'release'
 
     def update_name(self, widget, name):
         self.ids['action'].text = name
+
+    def update_action(self, widget, action):
+        self.ids['event'].text = action.event
 
     #def update_name(self, widget, value):
     #    self.ids['action'].text = value
 
 
-class SendOSCAction(ActionEventWidget):
-    #### TODO - don't think I need this..... ????
-    def __init__(self, *args, **kwargs):
-        ActionEventWidget.__init__(self, *args, **kwargs)
+class MappingEditor(FloatLayout):
+    """
+    Edit mapping of actions in an ActionCollection
+    """
+    mapping = ObjectProperty()
 
-    def build(self):
-        print("build")
+    def __init__(self, *args, **kwargs):
+        FloatLayout.__init__(self, *args, **kwargs)
+        self.action_event_widgets = []
+
+    def on_mapping(self, widget, mapping):
+        """
+        Update widget to show passed in action
+        :param widget: source widget
+        :param mapping: actioncollection
+        :return:
+        """
+        print("ActionEditor on_action")
+
+        bottom_bar = self.ids['bottom_bar']
+        for widget in self.action_event_widgets:
+            bottom_bar.remove_widget(widget)
+
+        for name, action in mapping.actions.items():
+            print name, action
+            widget = ActionEventWidget(name, action)
+            bottom_bar.add_widget(widget)
 
 
 # Side Bar
-class ActionEditor(FloatLayout):
-    pass
-
-
-
 class ActionList(ListView):
     pass
 
 
 class ActionSideBar(Accordion):
     model = ObjectProperty(None)
-    current_action = ObjectProperty(None)
+    current_mapping = ObjectProperty(None)
 
     def __init__(self, *args, **kwargs):
         Accordion.__init__(self, *args, **kwargs)
         self.open_mapping = None
         #self.on_select(self.on_blah)
 
-        self.action_lists = []  ## TODO rename
-        self.action_buttons = {}
+        self.mapping_lists = []  ## TODO rename
+        self.mapping_buttons = {}
 
     def on_model(self, widget, model):
         """
         Now model is specified, sort out what types actions to add
         """
-        for action_list in self.action_lists:
+        for action_list in self.mapping_lists:
             self.remove_widget(action_list)
-        self.action_buttons = {}
+        self.mapping_buttons = {}
 
         # create index of mappings by class
         mapping_idx = collections.defaultdict(list)
@@ -176,26 +203,28 @@ class ActionSideBar(Accordion):
             for source in mapping.sources:
                 mapping_idx[source['class']].append(mapping)
 
+        # create sidebar
         for (klassname, typename), emitters in model.event_emitters.items():
             pluralise = 's' if len(emitters) > 1 else ''
             accordion_item = AccordionItem(title='%s%s' % (typename.capitalize(), pluralise))
             accordion_item.bind(collapse=self.open_group)
-            self.action_lists.append(accordion_item)
+            self.mapping_lists.append(accordion_item)
 
             for mapping in mapping_idx.get(klassname, list()):
                 action_button = Button(text=mapping.name)
-                self.action_buttons[action_button] = mapping.action
+                self.mapping_buttons[action_button] = mapping.actions
                 action_button.bind(on_release=self.select_action)
                 accordion_item.add_widget(action_button)
                 if not first_containing_item:
                     first_containing_item = accordion_item
-                    first_action = mapping.action
+                    first_action = mapping.actions
             self.add_widget(accordion_item)
 
+        # open first accordion containing anything
         if first_containing_item:
             self.select(first_containing_item)
         if first_action:
-            self.current_action = first_action
+            self.current_mapping = first_action
 
     def open_group(self, item, collapse):
         if collapse is False:
@@ -204,14 +233,16 @@ class ActionSideBar(Accordion):
             ## self.open_mapping
 
     def select_action(self, button):
-        action = self.action_buttons[button]
-        self.current_action = action
+        mapping = self.mapping_buttons[button]
+        self.current_mapping = mapping
+        self.action_editor.mapping = mapping
 
 
 class EditScreen(Screen):
     ## profile_model = APCMiniModel()
 
     model = ObjectProperty()
+    action_editor = ObjectProperty()
 
     def __init__(self, *args, **kwargs):
         Screen.__init__(self, *args, **kwargs)

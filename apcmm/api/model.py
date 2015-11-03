@@ -8,7 +8,7 @@ from mnd.handler import Handler
 from enum import Enum
 
 from six.moves import range
-from actions import EVENT_PRESS, EVENT_RELEASE, EVENT_LONG_PRESS, EVENT_CHANGE
+from actions import EVENT_PRESS, EVENT_RELEASE, EVENT_LONG_PRESS, EVENT_CHANGE, SingleAction, StartStopAction
 
 RECV_MIDI = "APC MINI MIDI 1"
 SEND_MIDI = "APC MINI MIDI 1"
@@ -78,6 +78,7 @@ class GridButton(object):
 
     ##triggers = ButtonSource   # events button can trigger
     emits = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
+    action_collection_t = StartStopAction
 
     action_fields = ["type", "n", "note", "x", "y"]
 
@@ -142,6 +143,7 @@ class GridSlider(object):
 
     ##triggers = ControlSource   # events control can trigger
     emits = frozenset({EVENT_CHANGE})
+    action_collection_t = SingleAction
 
     action_fields = ["type", "n", "control", "x", "y", "value"]
 

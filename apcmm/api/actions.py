@@ -17,6 +17,78 @@ EVENT_CHANGE = "change"
 ACTIONS = {}   # { name: klass }
 TRIGGERS = {}  # { name: klass }
 
+ACTION_COLLECTIONS = {}  # { name: klass }
+
+def register_actioncollection(klass):
+    """
+    Make action available for mappings
+
+    :param klass:
+    """
+    global ACTION_COLLECTIONS
+    ACTION_COLLECTIONS[klass.__name__] = klass
+
+
+class ActionCollection(object):
+    """
+    ActionCollections are used by the GUI to group actions,
+    e.g. StartStopAction
+    """
+    def __init__(self, available_actions, **actions):
+        self.available_actions = available_actions
+        self.actions = {}
+        for name, action in actions.items():
+            assert name in available_actions
+            self.actions[name] = action
+
+    def run_action(self, action_name):
+        ## TODO - needed ??
+        action = self.actions.get(name)
+        if not action:
+            raise ValueError("ActionCollection has no action %s" % name)
+        action.run()
+
+
+    @staticmethod
+    def from_dict(d):
+        """ construct ActionCollection from dict """
+        try:
+            args = dict(**d)
+            classname = args.pop("class")
+            klass = ACTION_COLLECTIONS[classname]
+            actions = {}
+            for name in klass.ACTION_NAMES:
+                action_data = d.get(name)
+                if action_data is not None:
+                    args[name] = Action.from_dict(action_data)
+
+            return klass(**args)
+        except KeyError as e:
+            raise ValueError("from_dict missing arg %s " % str(e))
+
+
+class SingleAction(ActionCollection):
+    """
+    One action called 'action'
+    """
+    ACTION_NAMES = ["action"]
+
+    def __init__(self, action=None):
+        ActionCollection.__init__(self, self.ACTION_NAMES, action=action)
+
+
+class StartStopAction(ActionCollection):
+    """
+    Two actions 'start' and 'end'
+    """
+    ACTION_NAMES = ["start", "end"]
+
+    def __init__(self, start=None, end=None):
+        ActionCollection.__init__(self, self.ACTION_NAMES, start=start, end=end)
+
+
+register_actioncollection(SingleAction)
+register_actioncollection(StartStopAction)
 
 def register_action(klass):
     """
@@ -36,16 +108,6 @@ def register_trigger(klass):
     """
     global TRIGGERS
     TRIGGERS[klass] = klass.get_name()
-
-
-# class ButtonSource(object):
-#     name = "button"
-#     triggers = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
-#
-#
-# class ControlSource(object):
-#     name = "control"
-#     triggers = frozenset({EVENT_CHANGE})
 
 
 # ActionTriggers - different ways of triggering actions
@@ -104,8 +166,8 @@ class Action(object):
     Action base class
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, event):
+        self.event = event  # event that triggers this action
 
     @classmethod
     def get_name(cls):
@@ -124,8 +186,8 @@ class Action(object):
 
 
 class SendOSC(Action):
-    def __init__(self, path=None):
-        Action.__init__(self)
+    def __init__(self, event=None, path=None):
+        Action.__init__(self, event)
         self.path = path
 
     def run(self, source, event, data):
