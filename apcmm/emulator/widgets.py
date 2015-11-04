@@ -10,7 +10,6 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.floatlayout import FloatLayout
 
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
 from kivy.uix.listview import ListView
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
@@ -20,8 +19,6 @@ import apcmm.api as api
 from apcmm.api.model import SLIDER
 from apcmm.api.observers import APCMiniObserver
 import apcmm.emulator.buttons as buttons
-import apcmm.api.actions as actions
-
 
 def mk_dictadapter(data=None, cls=None, *args, **kwargs):
     """
@@ -95,8 +92,8 @@ class PerformanceScreen(Screen):
 
 # Bottom Bar components
 class MappingTitleBar(BoxLayout):
-    pass
-
+    def __init__(self, *args, **kwargs):
+        BoxLayout.__init__(self, *args, **kwargs)
 
 class ActionEventWidget(BoxLayout):
     """
@@ -130,11 +127,18 @@ class MappingEditor(FloatLayout):
     """
     Edit mapping of actions in an ActionCollection
     """
+
+    # TODO - Have a blank mapping instead of manually handling mapping_name
+
+    action_sidebar = ObjectProperty()
+
     mapping = ObjectProperty()
+    mapping_name = StringProperty("")
 
     def __init__(self, *args, **kwargs):
         FloatLayout.__init__(self, *args, **kwargs)
         self.action_event_widgets = []
+        self.mapping_name = ""
 
     def on_mapping(self, widget, mapping):
         """
@@ -143,16 +147,24 @@ class MappingEditor(FloatLayout):
         :param mapping: actioncollection
         :return:
         """
-        print("ActionEditor on_action")
+        self.mapping_name = mapping.name
 
         bottom_bar = self.ids['bottom_bar']
         for widget in self.action_event_widgets:
             bottom_bar.remove_widget(widget)
 
-        for name, action in mapping.actions.items():
-            print name, action
+        for name, action in mapping.actioncollection.actions.items():
             widget = ActionEventWidget(name, action)
+            self.action_event_widgets.append(widget)
             bottom_bar.add_widget(widget)
+
+    def set_mapping_name(self, name):
+        if self.mapping:
+            self.mapping_name = name
+            self.mapping.name = name
+
+            print self.action_sidebar
+            print self.action_sidebar.update_mapping_name(self.mapping, name)
 
 
 # Side Bar
@@ -191,6 +203,7 @@ class ActionSideBar(Accordion):
 
         # create sidebar
         for (klassname, typename), emitters in model.event_emitters.items():
+            # group accordions by widget type
             pluralise = 's' if len(emitters) > 1 else ''
             accordion_item = AccordionItem(title='%s%s' % (typename.capitalize(), pluralise))
             accordion_item.bind(collapse=self.open_group)
@@ -198,12 +211,12 @@ class ActionSideBar(Accordion):
 
             for mapping in mapping_idx.get(klassname, list()):
                 action_button = Button(text=mapping.name)
-                self.mapping_buttons[action_button] = mapping.actions
-                action_button.bind(on_release=self.select_action)
+                self.mapping_buttons[action_button] = mapping
+                action_button.bind(on_release=self.select_mapping)
                 accordion_item.add_widget(action_button)
                 if not first_containing_item:
                     first_containing_item = accordion_item
-                    first_action = mapping.actions
+                    first_action = mapping.actioncollection
             self.add_widget(accordion_item)
 
         # open first accordion containing anything
@@ -218,7 +231,19 @@ class ActionSideBar(Accordion):
             ## TODO
             ## self.open_mapping
 
-    def select_action(self, button):
+    def update_mapping_name(self, mapping, name):
+        """
+        Called by the bottom bar, to make the button title match
+        the new name
+        :param mapping:
+        :param name:
+        :return:
+        """
+        for button, button_mapping in self.mapping_buttons.items():
+            if mapping == button_mapping:
+                button.text = mapping.name
+
+    def select_mapping(self, button):
         mapping = self.mapping_buttons[button]
         self.current_mapping = mapping
         self.action_editor.mapping = mapping

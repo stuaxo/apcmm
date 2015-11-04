@@ -119,12 +119,14 @@
 
 <MappingTitleBar>:
     id: title
-    size_hint: 1, 0.3
+    size_hint: 1, 0.9
     Label:
         text: "Edit Mapping"
         size_hint: 0.3, 1
     TextInput:
-        text: "Smiley Control"
+        id: mapping_name
+        text: root.parent.parent.mapping_name
+        on_text: root.parent.parent.set_mapping_name(self.text)
         size_hint: 0.2, 1
         multiline: False
         background_color: 1, 1, 1, 0.025
@@ -164,15 +166,6 @@
         id: bottom_bar
         orientation: "vertical"
         MappingTitleBar:
-#        ActionEventWidget:
-#            id: start
-#            action_type: "..."
-#            #name: "Start"
-#        ActionEventWidget:
-#            id: end
-#            action_type: "..."
-#            #name: "End"
-
 
 <ActionList>:
     # list of actions
@@ -272,3 +265,4 @@
 
                     MappingEditor:
                         id: bottom_bar
+                        action_sidebar: action_sidebar

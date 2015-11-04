@@ -28,9 +28,12 @@ class Mapping(object):
             "path": "/vis/smilies/{control.id}/amount"
         }
         """
+
+        # TODO - expand sources
+
         self.name = name
         self.sources = sources
-        self.actions = actioncollection
+        self.actioncollection = actioncollection
 
         d = Dispatcher()
         for source in sources:
@@ -40,6 +43,7 @@ class Mapping(object):
         self.dispatchers = [d]
 
     def dispatch_event(self, source, event, data):
+        print("dispatch event....")
         for d in self.dispatchers:
             d.dispatch(source=source, event=event, data=data)
 
@@ -51,10 +55,8 @@ class Mapping(object):
         ##action_params = d.pop("action")
         ##action = Action.from_dict(action_params)
 
-
         actions_params = d.pop("actions")
         actions = ActionCollection.from_dict(actions_params)
-
 
         sources = d.get("sources", list())
         events = d.get("events", list())
@@ -78,10 +80,13 @@ def load_mappings(filename="default.yaml"):
     :return: list of mappings
     """
 
-    # TODO
+    # TODO - validate that action.event is valid
+    # TODO - make sure names are unique
+
     _mappings = [
         {
-            "name": "Smiley Control",
+            # mapping from sliders
+            "name": "Smiley Control #1",
             "sources": [{ ## which controls
                 "class": "GridSlider",  # GridSlider or GridButton
                 "controls": [{
@@ -89,9 +94,6 @@ def load_mappings(filename="default.yaml"):
                     "n__in": [1, 2, 3, 4]
                 }]
             }],
-            #"events": [{
-            #    "type": "control_change",  # receive any control change
-            #}],
             "actions": {
                 "class": "SingleAction",
                 "action": {  ## < this is the key into the action
@@ -101,7 +103,33 @@ def load_mappings(filename="default.yaml"):
                 }
             },
 
+        },
+
+        {
+            # mapping from clip buttons
+            "name": "Smiley Control #2",
+            "sources": [{ ## which controls
+                "class": "GridButton",  # GridSlider or GridButton
+                "controls": [{
+                    "type": "clip",  # obligatory
+                }]
+            }],
+            "actions": {
+                "class": "StartStopAction",
+                "start": {  ## < this is the key into the action
+                "class": "SendOSC",
+                "path": "/vis/smilies/{source.id}/start_emit",
+                "event": "press"
+                },
+                "end": {  ## < this is the key into the action
+                "class": "SendOSC",
+                "path": "/vis/smilies/{source.id}/stop_emit",
+                "event": "release"
+                },
+            },
+
         }
+
     ]
 
     mappings = []

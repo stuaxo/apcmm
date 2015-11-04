@@ -1,16 +1,14 @@
 import argparse
 import collections
 import logging
-from kivy.properties import ObjectProperty
+
 import mido
 
+from kivy.properties import ObjectProperty
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 
 from apcmm.api.mapping import load_mappings
-
-import signal
-
 import apcmm.api.model as model
 import apcmm.emulator.widgets as widgets
 
