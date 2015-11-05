@@ -19,7 +19,7 @@ import apcmm.api as api
 from apcmm.api.actions import EVENT_PRESS, EVENT_CHANGE, EVENT_RELEASE
 from apcmm.api.model import SLIDER
 from apcmm.api.observers import APCMiniObserver
-import apcmm.emulator.buttons as buttons
+import apcmm.emulator.button as button
 
 def mk_dictadapter(data=None, cls=None, *args, **kwargs):
     """
@@ -370,13 +370,13 @@ def create_widget(widget_data):
     if isinstance(widget_data, api.model.GridButton):
         button_type = widget_data.type
         if button_type == api.model.CLIP_LAUNCH:
-            return buttons.ClipButton(widget_data)
+            return button.ClipButton(widget_data)
         elif button_type == api.model.SCENE_LAUNCH:
-            return buttons.SceneButton(widget_data)
+            return button.SceneButton(widget_data)
         elif button_type == api.model.CONTROL:
-            return buttons.ControlButton(widget_data)
+            return button.ControlButton(widget_data)
         elif button_type == api.model.SHIFT:
-            return buttons.ShiftButton(widget_data)
+            return button.ShiftButton(widget_data)
         else:
             raise ValueError("Unknown button type", widget_data.type)
     elif isinstance(widget_data, api.model.GridSlider):
