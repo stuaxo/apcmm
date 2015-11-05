@@ -203,11 +203,13 @@ class SendOSC(Action):
         print self.path.format(control=control, event=event, data=data)
         print "model, control: ", model, control
         if self.led:
+            color_valid = False
             for color in control.valid_colors:
                 if color.name == self.led:
                     control.set_color(color)
+                    color_valid = True
                     break
-            else:
+            if not color_valid:
                 # TODO - logging
                 print("Invalid LED color ", self.led)
                 print("  valid colors: " + ", ".join(color.name for color in control.valid_colors))
