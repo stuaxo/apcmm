@@ -43,8 +43,8 @@ class Mapping(object):
         self.dispatchers = [d]
 
     def dispatch_event(self, source, event, data):
-        print("dispatch event....")
         for d in self.dispatchers:
+            print "DISPATCH SOURCE: ", source
             d.dispatch(source=source, event=event, data=data)
 
     @staticmethod
@@ -57,7 +57,6 @@ class Mapping(object):
         actions = ActionCollection.from_dict(actions_params)
 
         sources = d.get("sources", list())
-        events = d.get("events", list())
 
         mapping = Mapping(name, sources, actions)
         return mapping
@@ -96,7 +95,7 @@ def load_mappings(filename="default.yaml"):
                 "class": "SingleAction",
                 "action": {  ## < this is the key into the action
                 "class": "SendOSC",
-                "path": "/vis/smilies/{source.id}/amount",
+                "path": "/vis/smilies/{source.n}/amount",
                 "event": "control_change"
                 }
             },
@@ -116,12 +115,12 @@ def load_mappings(filename="default.yaml"):
                 "class": "StartStopAction",
                 "start": {  ## < this is the key into the action
                 "class": "SendOSC",
-                "path": "/vis/smilies/{source.id}/start_emit",
+                "path": "/vis/smilies/{source.n}/start_emit",
                 "event": "press"
                 },
                 "end": {  ## < this is the key into the action
                 "class": "SendOSC",
-                "path": "/vis/smilies/{source.id}/stop_emit",
+                "path": "/vis/smilies/{source.n}/stop_emit",
                 "event": "release"
                 },
             },

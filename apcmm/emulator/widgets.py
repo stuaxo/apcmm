@@ -16,8 +16,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.slider import Slider
 
 import apcmm.api as api
-from apcmm.api.actions import EVENT_PRESS
-from apcmm.api.model import SLIDER, BUTTON_PRESS
+from apcmm.api.actions import EVENT_PRESS, EVENT_CHANGE, EVENT_RELEASE
+from apcmm.api.model import SLIDER
 from apcmm.api.observers import APCMiniObserver
 import apcmm.emulator.buttons as buttons
 
@@ -309,6 +309,20 @@ class WidgetUpdater(APCMiniObserver):
     #    pass
 
 
+def mk_event_dispatch(model, widget_data, event_t):
+    """
+    Create function to dispatch events of event_t
+    :param model:
+    :param widget_data:
+    :param event_t:
+    :return:
+    """
+    def f(*args):
+        msg = widget_data.midi_event(event_t)
+        model.dispatch_event(widget_data, event_t, msg)
+    return f
+
+
 class APCMiniWidget(GridLayout):
     """
     Widget holding all the controls on a real APC Mini.
@@ -330,24 +344,14 @@ class APCMiniWidget(GridLayout):
             widget = create_widget(widget_data)
             if widget:
                 self.add_widget(widget)
+
                 if widget_data.type == SLIDER:
                     controls[widget_data.control] = widget
-
-                    def midi_slider_event(*args):
-                        print args
-                        msg = widget_data.midi_event(EVENT_PRESS)
-                        model._dispatch_to_mappings(widget_data, BUTTON_PRESS, msg)
-
-                    widget.bind(on_change=midi_slider_event)
-
+                    widget.bind(value=mk_event_dispatch(model, widget_data, EVENT_CHANGE))
                 else:
                     buttons[widget_data.note] = widget
-
-                    def midi_button_event(*args):
-                        msg = widget_data.midi_event(EVENT_PRESS)
-                        model._dispatch_to_mappings(widget_data, BUTTON_PRESS, msg)
-
-                    widget.bind(on_press=midi_button_event)
+                    widget.bind(on_press=mk_event_dispatch(model, widget_data, EVENT_PRESS))
+                    widget.bind(on_release=mk_event_dispatch(model, widget_data, EVENT_RELEASE))
 
         # WidgetObserver will update gui widgets on midi events
         widget_updater = WidgetUpdater(buttons, controls)
@@ -376,7 +380,7 @@ def create_widget(widget_data):
         else:
             raise ValueError("Unknown button type", widget_data.type)
     elif isinstance(widget_data, api.model.GridSlider):
-        return Slider(id=widget_data.name, min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
+        return Slider(min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
         ##         slider.bind(value_normalized=self.handle_slide)
     else:
         raise ValueError("Unknown widget type", widget_data.type)

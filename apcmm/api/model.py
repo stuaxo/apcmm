@@ -224,12 +224,12 @@ SLIDER = "slider"
 BUTTON_TYPES = [CLIP_LAUNCH, CONTROL, SCENE_LAUNCH, SHIFT]
 
 # Button event type
-BUTTON_PRESS = "press"
-BUTTON_RELEASE = "release"
-BUTTON_HOLD = "hold"
+#BUTTON_PRESS = "press"
+#BUTTON_RELEASE = "release"
+#BUTTON_HOLD = "hold"
 
 # Control event types
-CONTROL_CHANGE = "change"
+#CONTROL_CHANGE = "change"
 
 # class APCMiniLayout(object):
 #     def __init__(self):
@@ -355,23 +355,22 @@ class APCMiniModel(with_metaclass(Handler)):
     def add_observer(self, o):
         self.observers.append(o)
 
-    def _dispatch_to_mappings(self, source, event, data):
-        print("_dispatch_to_mappings ", self.mappings)
+    def dispatch_event(self, source, event, data):
         for mapping in self.mappings:
-            print("dispatch to ", mapping)
             mapping.dispatch_event(source, event, data)
 
-    def midi_control_event(self, name, msg):
-        assert name == "control_change", "Unknown midi event %s" % name
+    def midi_control_event(self, event_t, msg):
+        assert event_t == EVENT_CHANGE, "Unknown midi event %s" % event_t
         ctl = self.control_sliders[msg.control]
+        ctl.value = msg.value ## TODO - should probably be returning a new instance
         for ob in self.observers:
             m = getattr(ob, "on_control_msg", None)
             m(self, ctl, msg)
 
-            m = getattr(ob, "on_%s" % name, None)
+            m = getattr(ob, "on_%s" % event_t, None)
             m(self, ctl, msg.value)
 
-        self._dispatch_to_mappings(ctl, name, msg)
+        self.dispatch_event(ctl, event_t, msg)
 
     def midi_button_event(self, btn_t, event_t, msg):
         """
@@ -389,45 +388,44 @@ class APCMiniModel(with_metaclass(Handler)):
             m = getattr(ob, "on_%s" % event, None)
             m(self, btn)
 
-        self._dispatch_to_mappings(btn, event_t, msg)
+        self.dispatch_event(btn, event_t, msg)
 
     ### handlers for midi data from APC    
     @midi.handle(dict(type="note_on", note__in=Button.CLIP))
     def recv_clip_press(self, msg):
-        self.midi_button_event(CLIP_LAUNCH, BUTTON_PRESS, msg)
+        self.midi_button_event(CLIP_LAUNCH, EVENT_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note__in=Button.CLIP))
     def recv_clip_release(self, msg):
-        self.midi_button_event(CLIP_LAUNCH, BUTTON_RELEASE, msg)
+        self.midi_button_event(CLIP_LAUNCH, EVENT_RELEASE, msg)
 
     @midi.handle(dict(type="note_on", note__in=Button.CONTROL))
     def recv_control_press(self, msg):
-        self.midi_button_event(CONTROL, BUTTON_PRESS, msg)
+        self.midi_button_event(CONTROL, EVENT_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note__in=Button.CONTROL))
     def recv_control_release(self, msg):
-        self.midi_button_event(CONTROL, BUTTON_RELEASE, msg)
+        self.midi_button_event(CONTROL, EVENT_RELEASE, msg)
 
     @midi.handle(dict(type="note_on", note__in=Button.SCENE))
     def recv_scene_press(self, msg):
-        self.midi_button_event(SCENE_LAUNCH, BUTTON_PRESS, msg)
+        self.midi_button_event(SCENE_LAUNCH, EVENT_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note__in=Button.SCENE))
     def recv_scene_release(self, msg):
-        self.midi_button_event(SCENE_LAUNCH, BUTTON_RELEASE, msg)
+        self.midi_button_event(SCENE_LAUNCH, EVENT_RELEASE, msg)
 
     @midi.handle(dict(type="note_on", note=Button.SHIFT))
     def recv_shift_press(self, msg):
-        self.midi_button_event(SHIFT, BUTTON_PRESS, msg)
+        self.midi_button_event(SHIFT, EVENT_PRESS, msg)
 
     @midi.handle(dict(type="note_off", note=Button.SHIFT))
     def recv_shift_release(self, msg):
-        self.midi_button_event(SHIFT, BUTTON_RELEASE, msg)
+        self.midi_button_event(SHIFT, EVENT_RELEASE, msg)
 
     @midi.handle(dict(type="control_change", control__in=Slider.SLIDER))
     def recv_slide(self, msg):
-        # TODO
-        self.midi_control_event("control_change", msg)
+        self.midi_control_event(EVENT_CHANGE, msg)
 
 
 register_source(GridButton)

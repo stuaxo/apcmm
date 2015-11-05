@@ -12,7 +12,12 @@ Source - a collection of triggers, ie PRESS, RELEASE - TODO - consider merging i
 EVENT_PRESS = "press"
 EVENT_LONG_PRESS = "long_press"
 EVENT_RELEASE = "release"
-EVENT_CHANGE = "change"
+EVENT_CHANGE = "control_change" # matches midi event name, don't change
+EVENT_TIMEOUT = "timeout"
+## EVENT_SLIDE_START = "start_change" # TODO
+## EVENT_SLIDE_START = "stop_change" # TODO
+
+ALL_EVENTS = {EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE, EVENT_CHANGE, EVENT_TIMEOUT}
 
 ACTIONS = {}   # { name: klass }
 TRIGGERS = {}  # { name: klass }
@@ -41,13 +46,12 @@ class ActionCollection(object):
             assert name in available_actions
             self.actions[name] = action
 
-    def run_action(self, action_name):
+    def run_action(self, name):
         ## TODO - needed ??
         action = self.actions.get(name)
         if not action:
             raise ValueError("ActionCollection has no action %s" % name)
         action.run()
-
 
     @staticmethod
     def from_dict(d):
@@ -156,6 +160,7 @@ class Toggle(ActionTriggers):
             end=[EVENT_PRESS, EVENT_LONG_PRESS])
 
 
+# TODO - rename this lifecycle
 register_trigger(Gate)
 register_trigger(Toggle)
 register_trigger(OneShot)
@@ -168,6 +173,7 @@ class Action(object):
 
     def __init__(self, event):
         self.event = event  # event that triggers this action
+        assert event in ALL_EVENTS
 
     @classmethod
     def get_name(cls):
@@ -194,10 +200,12 @@ class SendOSC(Action):
         """
         :param source: control that triggered the action
         """
-        print("send an osc message")
-        print 'S: ', source
-        print 'E: ', event
-        print 'D: ', data
-        print self.path
+        # print("send an osc message")
+        # print 'source: ', source
+        # print 'event:  ', event
+        # print 'data:   ', data
+        # print 'path:   ', self.path
+
+        print self.path.format(source=source, event=event, data=data)
 
 register_action(SendOSC)
