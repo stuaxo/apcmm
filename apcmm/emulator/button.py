@@ -28,8 +28,6 @@ class RoundButton(ButtonBehavior, BoxLayout):
         self.data = data
         self.set_color(data)
 
-        data.on_change_color(self.set_color)
-
     def set_color(self, data):
         """
         :param color: one of the values in valid_colors enum
