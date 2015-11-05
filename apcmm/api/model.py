@@ -10,6 +10,8 @@ from enum import Enum
 from six.moves import range
 from actions import EVENT_PRESS, EVENT_RELEASE, EVENT_LONG_PRESS, EVENT_CHANGE, SingleAction, StartStopAction
 
+import mido
+
 RECV_MIDI = "APC MINI MIDI 1"
 SEND_MIDI = "APC MINI MIDI 1"
 
@@ -75,6 +77,8 @@ ControlColors.default = ControlColors.grey
 
 
 class GridButton(object):
+    # TODO - make GridButton a MetaClass so type and colors are baked in
+    #        for the others subclasses.
 
     ##triggers = ButtonSource   # events button can trigger
     emits = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
@@ -109,7 +113,11 @@ class GridButton(object):
         """
         :param event_t:
         :return: event_str
+
         """
+        # TODO - seperate out event creation, once
+        #        GridButton is a metaclass
+        # TODO - make midi event it's own thing
         if event_t == EVENT_PRESS:
             self.pressed = True
         if event_t == EVENT_LONG_PRESS:
@@ -119,6 +127,23 @@ class GridButton(object):
             self.pressed = False
             self.held = False
         return "%s_%s" % (self.type, event_t)
+
+    def to_midi(self):
+        if self.held or self.pressed:
+            return mido.Message(type="note_on", note=self.note)
+        else:
+            return mido.Message(type="note_off", note=self.note)
+
+    def midi_event(self, event_t, *data):
+        """
+        Synthesize a midi message to go with an event
+        :param event_t:
+        :param data:
+        :return: event, message
+        """
+        ev = self.event(event_t, *data)
+        msg = self.to_midi()
+        return ev, msg
 
     def on_change_color(self, cb):
         self.color_change_cb = cb
@@ -170,9 +195,20 @@ class GridSlider(object):
             self.value = data
         return "%s_%s" % (self.type, event_t)
 
-    # def update_value(self, value):
-    #     """ :return: copy of slider, with different value """
-    #     return GridSlider(self.n, self.control, self.x, self.y, value)
+    def to_midi(self):
+        # this will always set type to control_change
+        return mido.Message(type="control_change", control=self.n)
+
+    def midi_event(self, event_t, *data):
+        """
+        Synthesize a midi message to go with an event
+        :param event_t:
+        :param data:
+        :return: event, message
+        """
+        ev = self.event(event_t, *data)
+        msg = self.to_midi()
+        return ev, msg
 
     @property
     def name(self):
@@ -321,7 +357,7 @@ class APCMiniModel(with_metaclass(Handler)):
 
     def _dispatch_to_mappings(self, source, event, data):
         print("_dispatch_to_mappings ", self.mappings)
-        for mapping in self.mappings.values():
+        for mapping in self.mappings:
             print("dispatch to ", mapping)
             mapping.dispatch_event(source, event, data)
 
@@ -353,7 +389,7 @@ class APCMiniModel(with_metaclass(Handler)):
             m = getattr(ob, "on_%s" % event, None)
             m(self, btn)
 
-        self._dispatch_to_mappings(btn, event, msg)
+        self._dispatch_to_mappings(btn, event_t, msg)
 
     ### handlers for midi data from APC    
     @midi.handle(dict(type="note_on", note__in=Button.CLIP))

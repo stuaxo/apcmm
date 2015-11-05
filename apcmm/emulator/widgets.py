@@ -16,7 +16,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.slider import Slider
 
 import apcmm.api as api
-from apcmm.api.model import SLIDER
+from apcmm.api.actions import EVENT_PRESS
+from apcmm.api.model import SLIDER, BUTTON_PRESS
 from apcmm.api.observers import APCMiniObserver
 import apcmm.emulator.buttons as buttons
 
@@ -324,14 +325,29 @@ class APCMiniWidget(GridLayout):
         model = App.get_running_app().virtual_apc
         buttons = {}
         controls = {}
+
         for widget_data in model.grid.values():
             widget = create_widget(widget_data)
             if widget:
                 self.add_widget(widget)
                 if widget_data.type == SLIDER:
                     controls[widget_data.control] = widget
+
+                    def midi_slider_event(*args):
+                        print args
+                        msg = widget_data.midi_event(EVENT_PRESS)
+                        model._dispatch_to_mappings(widget_data, BUTTON_PRESS, msg)
+
+                    widget.bind(on_change=midi_slider_event)
+
                 else:
                     buttons[widget_data.note] = widget
+
+                    def midi_button_event(*args):
+                        msg = widget_data.midi_event(EVENT_PRESS)
+                        model._dispatch_to_mappings(widget_data, BUTTON_PRESS, msg)
+
+                    widget.bind(on_press=midi_button_event)
 
         # WidgetObserver will update gui widgets on midi events
         widget_updater = WidgetUpdater(buttons, controls)

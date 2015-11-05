@@ -52,8 +52,6 @@ class Mapping(object):
         """ construct Mapping from dict """
         d = dict(**d)
         name = d.pop("name")
-        ##action_params = d.pop("action")
-        ##action = Action.from_dict(action_params)
 
         actions_params = d.pop("actions")
         actions = ActionCollection.from_dict(actions_params)
