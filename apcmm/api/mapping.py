@@ -83,7 +83,7 @@ def load_mappings(filename="default.yaml"):
     _mappings = [
         {
             # mapping every other slider, smiley amount
-            "name": "Smiley Control #1",
+            "name": "Smiley Amount #1",
             "sources": [{ ## which controls
                 "class": "GridSlider",  # GridSlider or GridButton
                 "controls": {
@@ -103,7 +103,7 @@ def load_mappings(filename="default.yaml"):
 
         {
             # mapping every other slider, smiley alpha
-            "name": "Smiley Control #1",
+            "name": "Smiley Alpha #1",
             "sources": [{ ## which controls
                 "class": "GridSlider",  # GridSlider or GridButton
                 "controls": {
@@ -116,6 +116,27 @@ def load_mappings(filename="default.yaml"):
                 "action": {  ## < this is the key into the action
                 "class": "SendOSC",
                 "path": "/vis/smilies/{control.n}/alpha",
+                "event": "control_change"
+                }
+            },
+        },
+
+
+        {
+            # mapping every other slider, smiley alpha
+            "name": "Master Alpha",
+            "sources": [{ ## which controls
+                "class": "GridSlider",  # GridSlider or GridButton
+                "controls": {
+                    "type": "slider",  # obligatory
+                    "n": 8
+                }
+            }],
+            "actions": {
+                "class": "SingleAction",
+                "action": {  ## < this is the key into the action
+                "class": "SendOSC",
+                "path": "/vis/master/alpha",
                 "event": "control_change"
                 }
             },
