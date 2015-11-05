@@ -317,7 +317,7 @@ def mk_event_dispatch(model, widget_data, event_t):
     :param event_t:
     :return:
     """
-    def f(*args):
+    def f(widget, *args):
         msg = widget_data.midi_event(event_t)
         model.dispatch_event(widget_data, event_t, msg)
     return f
@@ -380,7 +380,7 @@ def create_widget(widget_data):
         else:
             raise ValueError("Unknown button type", widget_data.type)
     elif isinstance(widget_data, api.model.GridSlider):
-        return Slider(min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
+        return Slider(id=widget_data.name, min=0, max=127, value=63, orientation='vertical', size_hint=(.8, 6))
         ##         slider.bind(value_normalized=self.handle_slide)
     else:
         raise ValueError("Unknown widget type", widget_data.type)

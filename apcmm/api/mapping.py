@@ -38,14 +38,14 @@ class Mapping(object):
         d = Dispatcher()
         for source in sources:
             for action in actioncollection.actions.values():
-                bind_instancemethod(action.run, d, source=source, event=action.event) ## accept_args
+                control = source.get("controls", {})
+                bind_instancemethod(action.run, d, control=control, event=action.event) ## accept_args
 
         self.dispatchers = [d]
 
-    def dispatch_event(self, source, event, data):
+    def dispatch_event(self, control, event, data):
         for d in self.dispatchers:
-            print "DISPATCH SOURCE: ", source
-            d.dispatch(source=source, event=event, data=data)
+            d.dispatch(control=control, event=event, data=data)
 
     @staticmethod
     def from_dict(d):
@@ -57,7 +57,6 @@ class Mapping(object):
         actions = ActionCollection.from_dict(actions_params)
 
         sources = d.get("sources", list())
-
         mapping = Mapping(name, sources, actions)
         return mapping
 
@@ -79,6 +78,7 @@ def load_mappings(filename="default.yaml"):
 
     # TODO - validate that action.event is valid
     # TODO - make sure names are unique
+    # TODO - controls needs to be dict
 
     _mappings = [
         {
@@ -86,16 +86,16 @@ def load_mappings(filename="default.yaml"):
             "name": "Smiley Control #1",
             "sources": [{ ## which controls
                 "class": "GridSlider",  # GridSlider or GridButton
-                "controls": [{
+                "controls": {
                     "type": "slider",  # obligatory
                     "n__in": [1, 2, 3, 4]
-                }]
+                }
             }],
             "actions": {
                 "class": "SingleAction",
                 "action": {  ## < this is the key into the action
                 "class": "SendOSC",
-                "path": "/vis/smilies/{source.n}/amount",
+                "path": "/vis/smilies/{control.n}/amount",
                 "event": "control_change"
                 }
             },
@@ -107,20 +107,20 @@ def load_mappings(filename="default.yaml"):
             "name": "Smiley Control #2",
             "sources": [{ ## which controls
                 "class": "GridButton",  # GridSlider or GridButton
-                "controls": [{
+                "controls": {
                     "type": "clip",  # obligatory
-                }]
+                }
             }],
             "actions": {
                 "class": "StartStopAction",
                 "start": {  ## < this is the key into the action
                 "class": "SendOSC",
-                "path": "/vis/smilies/{source.n}/start_emit",
+                "path": "/vis/smilies/{control.n}/start_emit",
                 "event": "press"
                 },
                 "end": {  ## < this is the key into the action
                 "class": "SendOSC",
-                "path": "/vis/smilies/{source.n}/stop_emit",
+                "path": "/vis/smilies/{control.n}/stop_emit",
                 "event": "release"
                 },
             },

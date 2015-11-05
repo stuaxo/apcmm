@@ -355,9 +355,9 @@ class APCMiniModel(with_metaclass(Handler)):
     def add_observer(self, o):
         self.observers.append(o)
 
-    def dispatch_event(self, source, event, data):
+    def dispatch_event(self, control, event, data):
         for mapping in self.mappings:
-            mapping.dispatch_event(source, event, data)
+            mapping.dispatch_event(control, event, data)
 
     def midi_control_event(self, event_t, msg):
         assert event_t == EVENT_CHANGE, "Unknown midi event %s" % event_t

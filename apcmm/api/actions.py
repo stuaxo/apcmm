@@ -195,17 +195,12 @@ class SendOSC(Action):
     def __init__(self, event=None, path=None):
         Action.__init__(self, event)
         self.path = path
+        # TODO - verify path is OK here
 
-    def run(self, source, event, data):
+    def run(self, control, event, data):
         """
         :param source: control that triggered the action
         """
-        # print("send an osc message")
-        # print 'source: ', source
-        # print 'event:  ', event
-        # print 'data:   ', data
-        # print 'path:   ', self.path
-
-        print self.path.format(source=source, event=event, data=data)
+        print self.path.format(control=control, event=event, data=data)
 
 register_action(SendOSC)
