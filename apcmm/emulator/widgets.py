@@ -322,11 +322,6 @@ def mk_event_dispatch(model, widget_data, event_t):
         model.dispatch_event(widget_data, event_t, msg)
     return f
 
-def mk_set_light_color(widget):
-    def f(widget_data):
-        widget.set_color(widget_data.light_color.name)
-    return f
-
 class APCMiniWidget(GridLayout):
     """
     Widget holding all the controls on a real APC Mini.
@@ -358,7 +353,7 @@ class APCMiniWidget(GridLayout):
                     widget.bind(on_release=mk_event_dispatch(model, widget_data, EVENT_RELEASE))
 
                     if widget_data.type in [CLIP_LAUNCH, SCENE_LAUNCH, CONTROL]:
-                        widget_data.on_change_color(mk_set_light_color(widget))
+                        widget_data.on_change_color(widget.set_color)
 
 
         # WidgetObserver will update gui widgets on midi events
