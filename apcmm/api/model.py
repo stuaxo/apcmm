@@ -1,13 +1,12 @@
 from __future__ import print_function
 
 from collections import OrderedDict, defaultdict
-
-from six import with_metaclass
+from enum import Enum
 from mnd.dispatch import Dispatcher
 from mnd.handler import Handler
-from enum import Enum
-
 from six.moves import range
+from six import with_metaclass
+
 from actions import EVENT_PRESS, EVENT_RELEASE, EVENT_LONG_PRESS, EVENT_CHANGE, SingleAction, StartStopAction
 
 import mido
@@ -16,7 +15,6 @@ RECV_MIDI = "APC MINI MIDI 1"
 SEND_MIDI = "APC MINI MIDI 1"
 
 midi = Dispatcher()
-
 
 APC_BUTTON_EVENTS = [
     "clip_press",
@@ -223,50 +221,6 @@ SLIDER = "slider"
 
 BUTTON_TYPES = [CLIP_LAUNCH, CONTROL, SCENE_LAUNCH, SHIFT]
 
-# Button event type
-#BUTTON_PRESS = "press"
-#BUTTON_RELEASE = "release"
-#BUTTON_HOLD = "hold"
-
-# Control event types
-#CONTROL_CHANGE = "change"
-
-# class APCMiniLayout(object):
-#     def __init__(self):
-#         # TODO - find out what control buttons are for in Ableton
-#
-#         # 8x8 grid of clip launch buttons, and column of
-#         # scene launch buttons on the right
-#         scenes = zip(xrange(8), Button.SCENE).__iter__()
-#         for row in xrange(7, -1, -1):
-#             for col in xrange(0, 8):
-#                 note = (row * 8) + col
-#                 btn = GridButton(CLIP_LAUNCH, note, note, col, row, ClipColors)
-#                 self.clip_buttons.append(btn)
-#                 self.add_grid_button(btn)
-#
-#             # last column is scene launch
-#             scene_no, note = next(scenes)
-#             btn = GridButton(SCENE_LAUNCH, scene_no, note, 9, note, SceneColors)
-#             self.scene_buttons[note] = btn
-#             self.add_grid_button(btn)
-#
-#         # row 8 - control buttons and shift
-#         for n, note in enumerate(Button.CONTROL):
-#             btn = GridButton(CONTROL, n, note, n, 8, ControlColors)
-#             self.control_buttons[n] = btn
-#             self.add_grid_button(btn)
-#         else:
-#             btn = GridButton(SHIFT, 0, Button.SHIFT, n, 8)
-#             self.add_grid_button(btn)
-#             self.shift_button = btn
-#
-#         # row 9 - sliders
-#         for n, control in enumerate(Slider.SLIDER):
-#             slider = GridSlider(n, control, n, 9)
-#             self.control_sliders[n] = slider
-#             self.add_grid_slider(slider)
-
 
 class APCMiniModel(with_metaclass(Handler)):
     # TODO - is model something like 'layout'
@@ -357,7 +311,7 @@ class APCMiniModel(with_metaclass(Handler)):
 
     def dispatch_event(self, control, event, data):
         for mapping in self.mappings:
-            mapping.dispatch_event(control, event, data)
+            mapping.dispatch_event(self, control, event, data)
 
     def midi_control_event(self, event_t, msg):
         assert event_t == EVENT_CHANGE, "Unknown midi event %s" % event_t

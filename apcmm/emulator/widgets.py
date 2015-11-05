@@ -17,7 +17,7 @@ from kivy.uix.slider import Slider
 
 import apcmm.api as api
 from apcmm.api.actions import EVENT_PRESS, EVENT_CHANGE, EVENT_RELEASE
-from apcmm.api.model import SLIDER
+from apcmm.api.model import SLIDER, CLIP_LAUNCH, SCENE_LAUNCH, CONTROL
 from apcmm.api.observers import APCMiniObserver
 import apcmm.emulator.button as button
 
@@ -322,6 +322,10 @@ def mk_event_dispatch(model, widget_data, event_t):
         model.dispatch_event(widget_data, event_t, msg)
     return f
 
+def mk_set_light_color(widget):
+    def f(widget_data):
+        widget.set_color(widget_data.light_color.name)
+    return f
 
 class APCMiniWidget(GridLayout):
     """
@@ -352,6 +356,10 @@ class APCMiniWidget(GridLayout):
                     buttons[widget_data.note] = widget
                     widget.bind(on_press=mk_event_dispatch(model, widget_data, EVENT_PRESS))
                     widget.bind(on_release=mk_event_dispatch(model, widget_data, EVENT_RELEASE))
+
+                    if widget_data.type in [CLIP_LAUNCH, SCENE_LAUNCH, CONTROL]:
+                        widget_data.on_change_color(mk_set_light_color(widget))
+
 
         # WidgetObserver will update gui widgets on midi events
         widget_updater = WidgetUpdater(buttons, controls)

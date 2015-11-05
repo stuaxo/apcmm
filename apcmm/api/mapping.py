@@ -43,9 +43,9 @@ class Mapping(object):
 
         self.dispatchers = [d]
 
-    def dispatch_event(self, control, event, data):
+    def dispatch_event(self, model, control, event, data):
         for d in self.dispatchers:
-            d.dispatch(control=control, event=event, data=data)
+            d.dispatch(model, control=control, event=event, data=data)
 
     @staticmethod
     def from_dict(d):
@@ -116,12 +116,14 @@ def load_mappings(filename="default.yaml"):
                 "start": {  ## < this is the key into the action
                 "class": "SendOSC",
                 "path": "/vis/smilies/{control.n}/start_emit",
-                "event": "press"
+                "event": "press",
+                "led": "yellow",
                 },
                 "end": {  ## < this is the key into the action
                 "class": "SendOSC",
                 "path": "/vis/smilies/{control.n}/stop_emit",
-                "event": "release"
+                "event": "release",
+                "led": "grey",
                 },
             },
 

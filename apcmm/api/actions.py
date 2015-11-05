@@ -4,8 +4,6 @@ import re
 Which sources (controls) can trigger what sort of actions and how (actiontriggers)
 
 Source - a collection of triggers, ie PRESS, RELEASE - TODO - consider merging into ClipButton etc
-
-
 """
 
 
@@ -192,15 +190,26 @@ class Action(object):
 
 
 class SendOSC(Action):
-    def __init__(self, event=None, path=None):
+    def __init__(self, event=None, path=None, led=None):
         Action.__init__(self, event)
         self.path = path
+        self.led = led
         # TODO - verify path is OK here
 
-    def run(self, control, event, data):
+    def run(self, model, control, event, data):
         """
         :param source: control that triggered the action
         """
         print self.path.format(control=control, event=event, data=data)
+        print "model, control: ", model, control
+        if self.led:
+            for color in control.valid_colors:
+                if color.name == self.led:
+                    control.set_color(color)
+                    break
+            else:
+                # TODO - logging
+                print("Invalid LED color ", self.led)
+                print("  valid colors: " + ", ".join(color.name for color in control.valid_colors))
 
 register_action(SendOSC)
