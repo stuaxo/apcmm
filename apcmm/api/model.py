@@ -16,18 +16,6 @@ SEND_MIDI = "APC MINI MIDI 1"
 
 midi = Dispatcher()
 
-APC_BUTTON_EVENTS = [
-    "clip_press",
-    "clip_release",
-    "control_change",
-    "control_press",
-    "control_release",
-    "shift_press",
-    "shift_release",
-    "scene_press",
-    "scene_release"
-    ]
-
 EVENT_SOURCES = {}  # ca;
 
 def register_source(klass):

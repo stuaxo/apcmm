@@ -206,15 +206,18 @@ class ActionSideBar(Accordion):
         for (klassname, typename), emitters in model.event_emitters.items():
             # group accordions by widget type
             pluralise = 's' if len(emitters) > 1 else ''
-            accordion_item = AccordionItem(title='%s%s' % (typename.capitalize(), pluralise))
+            accordion_item = AccordionItem(title='%s%s >' % (typename.capitalize(), pluralise), text_size=(self.width, 0.7))
             accordion_item.bind(collapse=self.open_group)
+
+            content = BoxLayout(orientation="vertical")
+            accordion_item.add_widget(content)
             self.mapping_lists.append(accordion_item)
 
             for mapping in mapping_idx.get(klassname, list()):
                 action_button = Button(text=mapping.name)
                 self.mapping_buttons[action_button] = mapping
                 action_button.bind(on_release=self.select_mapping)
-                accordion_item.add_widget(action_button)
+                content.add_widget(action_button)
                 if not first_containing_item:
                     first_containing_item = accordion_item
                     first_action = mapping.actioncollection
