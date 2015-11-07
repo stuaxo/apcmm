@@ -47,20 +47,6 @@ class ApcMiniEmu(App):
         return sm
 
     @property
-    def profile_list(self):
-        return [ApcMiniEmu.DEFAULT_PROFILE, "test_profile"]
-
-    @property
-    def profile_model(self):
-        print "return profile model", self.virtual_apc
-        return self.virtual_apc
-
-    @profile_model.setter
-    def profile_model(self, model):
-        print("Set model")
-        self.virtual_apc = model
-
-    @property
     def midi_devices(self):
         devices = collections.OrderedDict()
         devices[None] = ApcMiniEmu.DISCONNECTED
