@@ -34,7 +34,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,sqlite3,pil,mido,six,mnd,enum34
+requirements = kivy,sqlite3,pil,mido,six,mnd,enum34,pyyaml
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
