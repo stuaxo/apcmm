@@ -13,7 +13,7 @@ class Mapping(object):
     A mapping, is the link between sources (buttons / controls)
     and actions.
     """
-    def __init__(self, name, sources, actioncollection):
+    def __init__(self, profile, name, sources, actioncollection):
         """
         :param sources: list of source filters
         :param action: class and params
@@ -34,6 +34,7 @@ class Mapping(object):
 
         # TODO - expand sources
 
+        self.profile = profile
         self.name = name
         self.sources = sources
         self.actioncollection = actioncollection
@@ -51,16 +52,16 @@ class Mapping(object):
             d.dispatch(model, control=control, event=event, data=data)
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(profile, d):
         """ construct Mapping from dict """
         d = dict(**d)
         name = d.pop("name")
 
         actions_params = d.pop("actions")
-        actions = ActionCollection.from_dict(actions_params)
+        actions = ActionCollection.from_dict(profile, actions_params)
 
         sources = d.get("sources", list())
-        mapping = Mapping(name, sources, actions)
+        mapping = Mapping(profile, name, sources, actions)
         return mapping
 
     def __dict__(self):

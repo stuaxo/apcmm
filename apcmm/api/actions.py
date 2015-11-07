@@ -53,7 +53,7 @@ class ActionCollection(object):
         action.run()
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(profile, d):
         """ construct ActionCollection from dict """
         try:
             args = dict(**d)
@@ -63,7 +63,7 @@ class ActionCollection(object):
             for name in klass.ACTION_NAMES:
                 action_data = d.get(name)
                 if action_data is not None:
-                    args[name] = Action.from_dict(action_data)
+                    args[name] = Action.from_dict(profile, action_data)
 
             return klass(**args)
         except KeyError as e:
@@ -170,7 +170,8 @@ class Action(object):
     Action base class
     """
 
-    def __init__(self, event):
+    def __init__(self, profile, event):
+        self.profile = profile
         self.event = event  # event that triggers this action
         assert event in ALL_EVENTS
 
@@ -179,20 +180,20 @@ class Action(object):
         return re.sub(r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))', r' \1', cls.__name__)
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(profile, d):
         """ construct Action from dict """
         try:
             args = dict(**d)
             classname = args.pop("class")
             klass = ACTIONS[classname]
-            return klass(**args)
+            return klass(profile, **args)
         except KeyError as e:
             raise ValueError("from_dict missing arg %s " % str(e))
 
 
 class SendOSC(Action):
-    def __init__(self, event=None, path=None, led=None):
-        Action.__init__(self, event)
+    def __init__(self, profile, event=None, path=None, led=None):
+        Action.__init__(self, profile, event)
         self.path = path
         self.led = led
         # TODO - verify path is OK here

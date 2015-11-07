@@ -4,23 +4,26 @@ from apcmm.api.model import APCMiniModel
 
 
 class Profile(object):
-    def __init__(self, virtual_apc, settings=None):
+    def __init__(self, virtual_apc, settings=None, plugins=None):
         self.virtual_apc = virtual_apc
         self.settings = settings
+        self.plugins = plugins
 
     @classmethod
     def load(cls, filename="settings.yaml"):
         with open(filename) as f:
             data = load(f)
-            mappings = []
-            for mapping in data.pop("mappings", []):
-                mappings.append(Mapping.from_dict(mapping))
-
+            plugins = data.pop("plugins", {})
             settings = data.pop("settings", {})
 
-        profile = Profile(
-            virtual_apc=APCMiniModel(mappings=mappings),
-            settings=settings)
+            # meh, we need a profile to load the mappings :/
+            profile = Profile(None, settings=settings, plugins=plugins)
+            mappings = []
+            for mapping in data.pop("mappings", []):
+                mappings.append(Mapping.from_dict(profile, mapping))
+
+            profile.virtual_apc = APCMiniModel(mappings=mappings)
+
         return profile
 
     def save(self, filename="settings-output.yaml"):
