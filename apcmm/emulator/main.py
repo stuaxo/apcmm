@@ -1,6 +1,7 @@
 import argparse
 import collections
 import logging
+from apcmm.api.profile import Profile
 
 import mido
 
@@ -8,7 +9,6 @@ from kivy.properties import ObjectProperty
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 
-from apcmm.api.mapping import load_mappings
 import apcmm.api.model as model
 import apcmm.emulator.widgets as widgets
 
@@ -16,6 +16,12 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = None
+
+try:
+    import colored_traceback
+    colored_traceback.add_hook()
+except ImportError:
+    pass
 
 class ApcMiniEmu(App):
     DISCONNECTED = "Disconnected"
@@ -28,8 +34,7 @@ class ApcMiniEmu(App):
         self.midi_port = None
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
 
-        mappings = load_mappings()
-        self.virtual_apc = model.APCMiniModel(mappings=mappings)
+        self.virtual_apc = Profile.load()
 
         App.__init__(self)
 

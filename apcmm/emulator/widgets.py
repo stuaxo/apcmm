@@ -6,18 +6,16 @@ from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.dropdown import DropDown
 from kivy.uix.floatlayout import FloatLayout
 
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.listview import ListView
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.uix.slider import Slider
 
 import apcmm.api as api
 from apcmm.api.actions import EVENT_PRESS, EVENT_CHANGE, EVENT_RELEASE
-from apcmm.api.model import SLIDER, CLIP_LAUNCH, SCENE_LAUNCH, CONTROL
+from apcmm.api.model import SLIDER, CLIP_LAUNCH, SCENE_LAUNCH, CONTROL, BUTTON_TYPES
 from apcmm.api.observers import APCMiniObserver
 import apcmm.emulator.button as button
 
@@ -168,10 +166,13 @@ class MappingEditor(FloatLayout):
             print self.action_sidebar.update_mapping_name(self.mapping, name)
 
 
-# Side Bar
-class ActionList(ListView):
-    pass
+# # Side Bar
+# class ActionList(ListView):
+#     pass
 
+
+class MappingAccordionItem(AccordionItem):
+    pass
 
 class ActionSideBar(Accordion):
     model = ObjectProperty(None)
@@ -194,26 +195,37 @@ class ActionSideBar(Accordion):
         self.mapping_buttons = {}
 
         # create index of mappings by class
-        mapping_idx = collections.defaultdict(list)
+        mapping_idx = collections.defaultdict(set)
         first_containing_item = None
         first_action = None
 
         for mapping in model.mappings:
             for source in mapping.sources:
-                mapping_idx[source['class']].append(mapping)
+                key = (source['class'], source['controls']['type'])
+                mapping_idx[key].add(mapping)
 
         # create sidebar
         for (klassname, typename), emitters in model.event_emitters.items():
             # group accordions by widget type
+
+            mapping_actions = mapping_idx.get((klassname, typename), list())
+
             pluralise = 's' if len(emitters) > 1 else ''
-            accordion_item = AccordionItem(title='%s%s >' % (typename.capitalize(), pluralise), text_size=(self.width, 0.7))
+            if typename in BUTTON_TYPES:
+                title = ("%s button%s >" % (typename, pluralise)).capitalize()
+            else:
+                title = ("%s%s >" % (typename, pluralise)).capitalize()
+
+            accordion_item = MappingAccordionItem(title=title, text_size=(self.width, 0.7))
+            if not len(mapping_actions):
+                accordion_item.background_color = (0, 0, 0, 0)
             accordion_item.bind(collapse=self.open_group)
 
             content = BoxLayout(orientation="vertical")
             accordion_item.add_widget(content)
             self.mapping_lists.append(accordion_item)
 
-            for mapping in mapping_idx.get(klassname, list()):
+            for mapping in mapping_actions:
                 action_button = Button(text=mapping.name)
                 self.mapping_buttons[action_button] = mapping
                 action_button.bind(on_release=self.select_mapping)
@@ -357,7 +369,6 @@ class APCMiniWidget(GridLayout):
 
                     if widget_data.type in [CLIP_LAUNCH, SCENE_LAUNCH, CONTROL]:
                         widget_data.on_change_color(widget.set_color)
-
 
         # WidgetObserver will update gui widgets on midi events
         widget_updater = WidgetUpdater(buttons, controls)

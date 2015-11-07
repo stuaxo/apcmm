@@ -1,9 +1,12 @@
-from mnd.handler import bind_instancemethod
 from yaml import load, dump
 from apcmm.api.actions import Action
 
 from mnd.dispatch import Dispatcher
+from mnd.handler import bind_instancemethod
 from actions import ActionCollection
+
+from six import with_metaclass
+
 
 class Mapping(object):
     """
@@ -68,119 +71,3 @@ class Mapping(object):
             "action": dict(self.action),
         }
         return d
-
-
-def load_mappings(filename="default.yaml"):
-    """
-    :param filename:
-    :return: list of mappings
-    """
-
-    # TODO - validate that action.event is valid
-    # TODO - make sure names are unique
-    # TODO - controls needs to be dict
-
-    _mappings = [
-        {
-            # mapping every other slider, smiley amount
-            "name": "Smiley Amount #1",
-            "sources": [{ ## which controls
-                "class": "GridSlider",  # GridSlider or GridButton
-                "controls": {
-                    "type": "slider",  # obligatory
-                    "n__in": [0, 2, 4, 6]
-                }
-            }],
-            "actions": {
-                "class": "SingleAction",
-                "action": {  ## < this is the key into the action
-                "class": "SendOSC",
-                "path": "/vis/smilies/{control.n}/amount",
-                "event": "control_change"
-                }
-            },
-        },
-
-        {
-            # mapping every other slider, smiley alpha
-            "name": "Smiley Alpha #1",
-            "sources": [{ ## which controls
-                "class": "GridSlider",  # GridSlider or GridButton
-                "controls": {
-                    "type": "slider",  # obligatory
-                    "n__in": [1, 3, 5, 7]
-                }
-            }],
-            "actions": {
-                "class": "SingleAction",
-                "action": {  ## < this is the key into the action
-                "class": "SendOSC",
-                "path": "/vis/smilies/{control.n}/alpha",
-                "event": "control_change"
-                }
-            },
-        },
-
-
-        {
-            # mapping every other slider, smiley alpha
-            "name": "Master Alpha",
-            "sources": [{ ## which controls
-                "class": "GridSlider",  # GridSlider or GridButton
-                "controls": {
-                    "type": "slider",  # obligatory
-                    "n": 8
-                }
-            }],
-            "actions": {
-                "class": "SingleAction",
-                "action": {  ## < this is the key into the action
-                "class": "SendOSC",
-                "path": "/vis/master/alpha",
-                "event": "control_change"
-                }
-            },
-        },
-
-
-        {
-            # mapping from clip buttons
-            "name": "Smiley Control #2",
-            "sources": [{ ## which controls
-                "class": "GridButton",  # GridSlider or GridButton
-                "controls": {
-                    "type": "clip",  # obligatory
-                }
-            }],
-            "actions": {
-                "class": "StartStopAction",
-                "start": {  ## < this is the key into the action
-                "class": "SendOSC",
-                "path": "/vis/smilies/{control.n}/start_emit",
-                "event": "press",
-                "led": "yellow",
-                },
-                "end": {  ## < this is the key into the action
-                "class": "SendOSC",
-                "path": "/vis/smilies/{control.n}/stop_emit",
-                "event": "release",
-                "led": "grey",
-                },
-            },
-        },
-
-    ]
-
-    mappings = []
-    for mapping in _mappings:
-        mappings.append(Mapping.from_dict(mapping))
-
-    return mappings
-
-def save_mappings(mappings, filename="default.yaml"):
-    """
-    :param mappings: list of mappings
-    :param filename: filename to save
-    :return:
-    """
-    print dump(mappings, default_flow_style=False)

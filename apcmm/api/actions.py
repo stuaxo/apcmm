@@ -1,4 +1,5 @@
 import re
+from kivy.lib.osc import oscAPI
 
 """
 Which sources (controls) can trigger what sort of actions and how (actiontriggers)
@@ -200,8 +201,10 @@ class SendOSC(Action):
         """
         :param source: control that triggered the action
         """
-        print self.path.format(control=control, event=event, data=data)
-        print "model, control: ", model, control
+        path = self.path.format(control=control, event=event, data=data)
+        print path
+        #print "model, control: ", model, control
+        #oscAPI.sendMsg(path, dataArray=['answer'], ipAddr='192.168.1.101', port=8889)
         if self.led:
             color_valid = False
             for color in control.valid_colors:

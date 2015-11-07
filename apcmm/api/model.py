@@ -235,6 +235,9 @@ class APCMiniModel(with_metaclass(Handler)):
         self.note_buttons = OrderedDict()       # indexed by note
         self.control_sliders = OrderedDict()    # indexed by control id
 
+        # self.mappings = Mappings(
+        #     **{mapping.name: mapping for mapping in mappings}
+        # )
         if mappings is None:
             self.mappings = []                  # { name: [actions]
         else:
