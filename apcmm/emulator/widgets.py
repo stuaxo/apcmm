@@ -350,7 +350,7 @@ class APCMiniWidget(GridLayout):
     def __init__(self, *args, **kwargs):
         GridLayout.__init__(self, cols=9, rows=10)   # chuck all the controls into one grid
 
-        model = App.get_running_app().virtual_apc
+        model = App.get_running_app().profile.virtual_apc
         buttons = {}
         controls = {}
 

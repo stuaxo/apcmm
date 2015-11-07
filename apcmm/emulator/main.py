@@ -27,7 +27,7 @@ class ApcMiniEmu(App):
     DISCONNECTED = "Disconnected"
     DEFAULT_PROFILE = "default"
 
-    virtual_apc = ObjectProperty()
+    profile = ObjectProperty()
 
     def __init__(self, first_screen=None):
         self.first_screen = first_screen
@@ -35,7 +35,6 @@ class ApcMiniEmu(App):
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
 
         self.profile = Profile.load()
-        self.virtual_apc = self.profile.virtual_apc
 
         App.__init__(self)
 
@@ -46,10 +45,6 @@ class ApcMiniEmu(App):
         if self.first_screen:
             sm.current = self.first_screen
         return sm
-
-    def set_virtual_apc(self, virtual_apc):
-        self.virtual_apc = virtual_apc
-        print("VIRTUAL_APC ", self.virtual_apc)
 
     @property
     def profile_list(self):
