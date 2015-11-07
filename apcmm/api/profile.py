@@ -4,7 +4,7 @@ from apcmm.api.model import APCMiniModel
 
 
 class Profile(object):
-    def __init__(self, virtual_apc, settings=settings):
+    def __init__(self, virtual_apc, settings=None):
         self.virtual_apc = virtual_apc
         self.settings = settings
 

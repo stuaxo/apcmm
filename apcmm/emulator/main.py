@@ -34,7 +34,8 @@ class ApcMiniEmu(App):
         self.midi_port = None
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
 
-        self.virtual_apc = Profile.load()
+        self.profile = Profile.load()
+        self.virtual_apc = self.profile.virtual_apc
 
         App.__init__(self)
 
