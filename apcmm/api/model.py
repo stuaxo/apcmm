@@ -62,7 +62,26 @@ class ControlColors(Enum):
 ControlColors.default = ControlColors.grey
 
 
-class GridButton(object):
+class GridWidget(object):
+    action_fields = []
+
+    def update_from(self, src):
+        """
+        Update fields in action_fields from src
+        :param src: src widget
+        :return: dict of changed values
+        """
+        changed = {}
+        for name in self.action_fields:
+            other_field = getattr(src, name)
+            this_field = getattr(self, name)
+            if other_field != this_field:
+                changed[name] = other_field
+                setattr(self, name, other_field)
+        return changed
+
+
+class GridButton(GridWidget):
     # TODO - make GridButton a MetaClass so type and colors are baked in
     #        for the others subclasses.
 
@@ -70,7 +89,7 @@ class GridButton(object):
     emits = frozenset({EVENT_PRESS, EVENT_LONG_PRESS, EVENT_RELEASE})
     action_collection_t = StartStopAction
 
-    action_fields = ["type", "n", "note", "x", "y"]
+    action_fields = ["type", "n", "note", "x", "y", "light_color"]
 
     def __init__(self, type, n, note, x, y, colors=None):
         """
@@ -80,6 +99,7 @@ class GridButton(object):
         :param x:    x on grid
         :param y:    y on grid
         """
+        GridWidget.__init__(self)
         self.type = type
         self.n = n
         self.note = note
@@ -92,6 +112,8 @@ class GridButton(object):
         self.valid_colors = colors
         if colors is not None:
             self.light_color = colors.default
+        else:
+            self.light_color = None
 
         self.color_change_cb = []
 
@@ -119,6 +141,13 @@ class GridButton(object):
             return mido.Message(type="note_on", note=self.note)
         else:
             return mido.Message(type="note_off", note=self.note)
+
+    def midi_lightcolor(self):
+        """
+        :return: midi message to set apc mini light
+        """
+        if self.light_color is not None:
+            return mido.Message('note_on', note=self.note, velocity=self.light_color.value)
 
     def midi_event(self, event_t, *data):
         """
@@ -149,7 +178,7 @@ class GridButton(object):
         return "%s_%d" % (self.type, self.n)
 
 
-class GridSlider(object):
+class GridSlider(GridWidget):
 
     ##triggers = ControlSource   # events control can trigger
     emits = frozenset({EVENT_CHANGE})
@@ -164,6 +193,7 @@ class GridSlider(object):
         :param x: x on grid
         :param y: y on grid
         """
+        GridWidget.__init__(self)
         self.type = SLIDER
         self.n = n
         self.control = control
@@ -280,6 +310,29 @@ class APCMiniModel(with_metaclass(Handler)):
             self.control_sliders[n] = slider
             self.add_grid_slider(slider)
 
+        self.slave_model = None
+        self.slave_port = None
+
+    def connect_slave(self, midiport):
+        """
+        :return:  new model device
+        """
+        self.slave_model = APCMiniModel()
+        self.slave_port = midiport
+
+    def update_slave(self):
+        if self.slave_model and self.slave_port:
+            for this_w, other_w in zip(self.grid.values(), self.slave_model.grid.values()):
+                if this_w != other_w:
+                    changed = other_w.update_from(this_w)
+                    if changed:
+                        ## TODO: hack!
+                        for name, value in changed.items():
+                            if name == 'light_color':
+                                msg = this_w.midi_lightcolor()
+                                print("send ", msg)
+                                self.slave_port.send(msg)
+
     def add_grid_button(self, w):
         """
         Add widget with x, y
@@ -302,6 +355,8 @@ class APCMiniModel(with_metaclass(Handler)):
     def dispatch_event(self, control, event, data):
         for mapping in self.mappings:
             mapping.dispatch_event(self, control, event, data)
+
+        self.update_slave()
 
     def midi_control_event(self, event_t, msg):
         assert event_t == EVENT_CHANGE, "Unknown midi event %s" % event_t

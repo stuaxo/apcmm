@@ -5,9 +5,9 @@ mappings:
       data:
       - [float, control.value]
       event: control_change
-      path: /vis/smilies/{control.n}/amount
+      path: /vis/entities/{control.n}/amount
     class: SingleAction
-  name: 'Smiley Amount #1'
+  name: 'Entity Amount #1'
   sources:
   - class: GridSlider
     controls:
@@ -19,9 +19,9 @@ mappings:
       data:
       - [float, control.value]
       event: control_change
-      path: /vis/smilies/{control.n}/alpha
+      path: /vis/entities/{control.n}/alpha
     class: SingleAction
-  name: 'Smiley Alpha #1'
+  name: 'Entity Alpha #1'
   sources:
   - class: GridSlider
     controls:
@@ -41,12 +41,20 @@ mappings:
     controls: {n: 8, type: slider}
 - actions:
     class: StartStopAction
-    end: {class: SendOSC, event: release, led: grey, path: '/vis/smilies/{control.n}/stop_emit'}
-    start: {class: SendOSC, event: press, led: red, path: '/vis/smilies/{control.n}/start_emit'}
-  name: 'Smiley Control #2'
+    end: {class: SendOSC, event: release, led: grey, path: '/vis/entities/{control.n}/stop_emit'}
+    start: {class: SendOSC, event: press, led: red, path: '/vis/entities/{control.n}/start_emit'}
+  name: 'Emit Control #2'
   sources:
   - class: GridButton
     controls: {type: clip}
+- actions:
+    class: StartStopAction
+    end: {class: SendOSC, event: release, led: grey, path: '/vis/scene/{control.n}/donothing'}
+    start: {class: SendOSC, event: press, led: green, path: '/vis/scene/{control.n}/start'}
+  name: 'Change Scene'
+  sources:
+  - class: GridButton
+    controls: {type: scene}
 plugins: [send_osc]
 settings:
   send_osc: {target: 'localhost:1234'}

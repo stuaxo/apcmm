@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from yaml import load, dump
 from apcmm.api.actions import Action
 
@@ -43,7 +45,8 @@ class Mapping(object):
         for source in sources:
             for action in actioncollection.actions.values():
                 control = source.get("controls", {})
-                bind_instancemethod(action.run, d, control=control, event=action.event) ## accept_args
+                if action is not None:
+                    bind_instancemethod(action.run, d, control=control, event=action.event) ## accept_args
 
         self.dispatchers = [d]
 

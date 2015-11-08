@@ -34,6 +34,7 @@ class ApcMiniEmu(App):
         self.midi_port = None
         self.profile_name = ApcMiniEmu.DEFAULT_PROFILE
 
+        self.connected_apc = None
         self.profile = Profile.load()
 
         App.__init__(self)
@@ -65,8 +66,11 @@ class ApcMiniEmu(App):
 
         if portname is None:
             self.midi_port = None
+            if self.connected_apc is not None:
+                pass  ## send reset
         else:
             self.midi_port = mido.open_ioport(portname, callback=model.midi.dispatch, autoreset=True)
+            self.connected_apc = self.profile.virtual_apc.connect_slave(self.midi_port)
 
     @property
     def portname(self):
