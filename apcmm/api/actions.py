@@ -1,5 +1,4 @@
 import re
-from kivy.lib.osc import oscAPI
 
 """
 Which sources (controls) can trigger what sort of actions and how (actiontriggers)
@@ -191,11 +190,25 @@ class Action(object):
             raise ValueError("from_dict missing arg %s " % str(e))
 
 
+
+##from kivy.lib.osc import oscAPI
+import liblo
+
 class SendOSC(Action):
     def __init__(self, profile, event=None, path=None, led=None):
+        ## TODO - add list of what to send - "msg.velocity:float"
         Action.__init__(self, profile, event)
         self.path = path
         self.led = led
+
+        settings = self.profile.settings.get("send_osc", {})
+        target = settings.get("target")
+        if target is not None:
+            self.addr, _, self.port = target.partition(":")
+        else:
+            self.addr, self.port = None, None
+
+        self.target = liblo.Address(self.addr, self.port)
         # TODO - verify path is OK here
 
     def run(self, model, control, event, data):
@@ -204,8 +217,16 @@ class SendOSC(Action):
         """
         path = self.path.format(control=control, event=event, data=data)
         print path
-        #print "model, control: ", model, control
-        #oscAPI.sendMsg(path, dataArray=['answer'], ipAddr='192.168.1.101', port=8889)
+        print data
+        ##oscAPI.sendMsg(path, dataArray=['answer'], ipAddr=self.addr, port=self.port)
+
+        if self.target:
+            msg = liblo.Message(self.path)
+            #msg.add(data)
+            liblo.send(self.target, msg)
+        else:
+            print("No target address for OSC")
+
         if self.led:
             color_valid = False
             for color in control.valid_colors:

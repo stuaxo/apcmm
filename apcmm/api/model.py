@@ -93,7 +93,7 @@ class GridButton(object):
         if colors is not None:
             self.light_color = colors.default
 
-        self.color_change_cb = None
+        self.color_change_cb = []
 
     def event(self, event_t, *data):
         """
@@ -132,7 +132,7 @@ class GridButton(object):
         return ev, msg
 
     def on_change_color(self, cb):
-        self.color_change_cb = cb
+        self.color_change_cb.append(cb)
 
     def set_color(self, color):
         """
@@ -141,8 +141,7 @@ class GridButton(object):
         :return:
         """
         self.light_color = color
-        f = self.color_change_cb
-        if f is not None:
+        for f in self.color_change_cb:
             f(self)
 
     @property
