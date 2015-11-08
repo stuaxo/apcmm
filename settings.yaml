@@ -3,7 +3,7 @@ mappings:
     action:
       class: SendOSC
       data:
-      - [float, msg.value]
+      - [float, control.value]
       event: control_change
       path: /vis/smilies/{control.n}/amount
     class: SingleAction
@@ -17,7 +17,7 @@ mappings:
     action:
       class: SendOSC
       data:
-      - [float, msg.value]
+      - [float, control.value]
       event: control_change
       path: /vis/smilies/{control.n}/alpha
     class: SingleAction
@@ -31,7 +31,7 @@ mappings:
     action:
       class: SendOSC
       data:
-      - [float, msg.value]
+      - [float, control.value]
       event: control_change
       path: /vis/master/alpha
     class: SingleAction

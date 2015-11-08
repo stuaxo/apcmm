@@ -354,7 +354,20 @@ def mk_event_dispatch(model, widget_data, event_t):
     :return:
     """
     def f(widget, *args):
-        ev, msg = widget_data.midi_event(event_t)
+        ev, msg = widget_data.midi_event(event_t, *args)
+        model.dispatch_event(widget_data, event_t, msg)
+    return f
+
+def mk_controlchange_dispatch(model, widget_data, event_t):
+    """
+    Create function to dispatch events of event_t
+    :param model:
+    :param widget_data:
+    :param event_t:
+    :return:
+    """
+    def f(widget, value, *args):
+        ev, msg = widget_data.midi_event(event_t, value, *args) ## TODO - inconsistant
         model.dispatch_event(widget_data, event_t, msg)
     return f
 

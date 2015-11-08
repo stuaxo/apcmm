@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import re
 
 """
@@ -238,13 +240,21 @@ class SendOSC(Action):
         ##oscAPI.sendMsg(path, dataArray=['answer'], ipAddr=self.addr, port=self.port)
 
         if self.target:
-            msg = liblo.Message(self.path)
+            osc_msg = liblo.Message(path)
 
+            print("OSC: ", path)
             for fmt, src in self.msg_templates:
-                data_str = src.format(control=control, event=event, msg=msg)
-                data = fmt(data_str)
-                msg.add(data)
-            liblo.send(self.target, msg)
+                #print("src: '%s'" % src)
+                data_str = ("{%s}" % src).format(control=control, event=event, msg=msg)
+                #print("src: '%s' data_str: '%s' fmt: '%s' " % (src, data_str, fmt))
+                try:
+                    data = fmt(data_str)
+                    osc_msg.add(data)
+                    print(" - ", data)
+                except Exception as e:
+                    print("Problem converting '%s' to '%s'" % (data_str, fmt))
+                    print("- template: '%s'" % src)
+            liblo.send(self.target, osc_msg)
         else:
             print("No target address for OSC")
 

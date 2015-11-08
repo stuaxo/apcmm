@@ -177,7 +177,7 @@ class GridSlider(object):
         :return: return event string
         """
         if event_t == EVENT_CHANGE:
-            self.value = data
+            self.value = data[0]
         return "%s_%s" % (self.type, event_t)
 
     def to_midi(self):
