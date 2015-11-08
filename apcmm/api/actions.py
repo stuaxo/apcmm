@@ -195,7 +195,7 @@ class Action(object):
 import liblo
 
 class SendOSC(Action):
-    def __init__(self, profile, event=None, path=None, led=None):
+    def __init__(self, profile, event=None, path=None, led=None, data=None):
         ## TODO - add list of what to send - "msg.velocity:float"
         Action.__init__(self, profile, event)
         self.path = path
@@ -211,13 +211,13 @@ class SendOSC(Action):
         self.target = liblo.Address(self.addr, self.port)
         # TODO - verify path is OK here
 
-    def run(self, model, control, event, data):
+    def run(self, model, control, event, msg, *args):
         """
         :param source: control that triggered the action
         """
-        path = self.path.format(control=control, event=event, data=data)
+        path = self.path.format(control=control, event=event, msg=msg)
         print path
-        print data
+        print msg
         ##oscAPI.sendMsg(path, dataArray=['answer'], ipAddr=self.addr, port=self.port)
 
         if self.target:

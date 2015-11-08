@@ -47,9 +47,9 @@ class Mapping(object):
 
         self.dispatchers = [d]
 
-    def dispatch_event(self, model, control, event, data):
+    def dispatch_event(self, model, control, event, msg):
         for d in self.dispatchers:
-            d.dispatch(model, control=control, event=event, data=data)
+            d.dispatch(model, control=control, event=event, msg=msg)
 
     @staticmethod
     def from_dict(profile, d):

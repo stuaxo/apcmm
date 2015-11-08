@@ -100,6 +100,9 @@ class ActionEventWidget(BoxLayout):
     """
     name = ObjectProperty()
     action = ObjectProperty()
+
+    led_color = ObjectProperty()
+    modifier = ObjectProperty()
     #action_type = ObjectProperty()
 
     # def __init__(self, *args, **kwargs):
@@ -107,12 +110,16 @@ class ActionEventWidget(BoxLayout):
     #     self.bind(name=self.update_name)
     #     #self.bind(action_type=self.update_trigger)
 
-    def __init__(self, name, action, *args, **kwargs):
+    def __init__(self, name, action, led_color=None, modifier=None, *args, **kwargs):
         BoxLayout.__init__(self, id=name, *args, **kwargs)
         self.bind(name=self.update_name)
         self.bind(action=self.update_action)
+        self.bind(led_color=self.update_led_color)
+        self.bind(modifier=self.update_modifier)
         self.name = name
         self.action = action
+        self.led_color = led_color
+        self.modifier = modifier
 
     def update_name(self, widget, name):
         self.ids['action'].text = name
@@ -120,6 +127,18 @@ class ActionEventWidget(BoxLayout):
     def update_action(self, widget, action):
         self.ids['event'].text = action.event
         # TODO - highlight all affected controls by
+        print("update action")
+        self.ids["led_dropdown"].clear_widgets()
+        self.ids["modifier_dropdown"].clear_widgets()
+
+    def update_led_color(self, widget, led_color):
+        #self.ids['action'].text = name
+        print "update led color"
+
+    def update_modifier(self, widget, modifier):
+        #self.ids['action'].text = name
+        print "update modifier"
+
 
 
 class MappingEditor(FloatLayout):
@@ -153,6 +172,8 @@ class MappingEditor(FloatLayout):
             bottom_bar.remove_widget(widget)
 
         for name, action in mapping.actioncollection.actions.items():
+            # TODO - pass in led colors here, possibly should have other method for supplementary stuff like led color ??
+
             widget = ActionEventWidget(name, action)
             self.action_event_widgets.append(widget)
             bottom_bar.add_widget(widget)
@@ -333,7 +354,7 @@ def mk_event_dispatch(model, widget_data, event_t):
     :return:
     """
     def f(widget, *args):
-        msg = widget_data.midi_event(event_t)
+        ev, msg = widget_data.midi_event(event_t)
         model.dispatch_event(widget_data, event_t, msg)
     return f
 
