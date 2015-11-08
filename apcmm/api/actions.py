@@ -235,8 +235,6 @@ class SendOSC(Action):
         :param source: control that triggered the action
         """
         path = self.path.format(control=control, event=event, msg=msg)
-        print path
-        print msg
         ##oscAPI.sendMsg(path, dataArray=['answer'], ipAddr=self.addr, port=self.port)
 
         if self.target:
