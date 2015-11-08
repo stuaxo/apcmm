@@ -196,6 +196,15 @@ import liblo
 
 class SendOSC(Action):
     def __init__(self, profile, event=None, path=None, led=None, data=None):
+        """
+
+        :param profile:
+        :param event:
+        :param path:
+        :param led:
+        :param data: messages format tuples of fmt, source e.g. ("float", "msg.value")
+        :return:
+        """
         ## TODO - add list of what to send - "msg.velocity:float"
         Action.__init__(self, profile, event)
         self.path = path
@@ -211,6 +220,16 @@ class SendOSC(Action):
         self.target = liblo.Address(self.addr, self.port)
         # TODO - verify path is OK here
 
+        msg_templates = []
+        for fmt_str, src_str in data or []:
+            if fmt_str == "float":
+                fmt = float
+            else:
+                raise ValueError("Unknown message format %s" % fmt_str)
+            msg_templates.append((fmt, src_str))
+
+        self.msg_templates = msg_templates
+
     def run(self, model, control, event, msg, *args):
         """
         :param source: control that triggered the action
@@ -222,7 +241,11 @@ class SendOSC(Action):
 
         if self.target:
             msg = liblo.Message(self.path)
-            #msg.add(data)
+
+            for fmt, src in self.msg_templates:
+                data_str = src.format(control=control, event=event, msg=msg)
+                data = fmt(data_str)
+                msg.add(data)
             liblo.send(self.target, msg)
         else:
             print("No target address for OSC")

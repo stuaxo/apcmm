@@ -1,6 +1,11 @@
 mappings:
 - actions:
-    action: {class: SendOSC, event: control_change, path: '/vis/smilies/{control.n}/amount'}
+    action:
+      class: SendOSC
+      data:
+      - [float, msg.value]
+      event: control_change
+      path: /vis/smilies/{control.n}/amount
     class: SingleAction
   name: 'Smiley Amount #1'
   sources:
@@ -9,7 +14,12 @@ mappings:
       n__in: [0, 2, 4, 6]
       type: slider
 - actions:
-    action: {class: SendOSC, event: control_change, path: '/vis/smilies/{control.n}/alpha'}
+    action:
+      class: SendOSC
+      data:
+      - [float, msg.value]
+      event: control_change
+      path: /vis/smilies/{control.n}/alpha
     class: SingleAction
   name: 'Smiley Alpha #1'
   sources:
@@ -18,7 +28,12 @@ mappings:
       n__in: [1, 3, 5, 7]
       type: slider
 - actions:
-    action: {class: SendOSC, event: control_change, path: /vis/master/alpha}
+    action:
+      class: SendOSC
+      data:
+      - [float, msg.value]
+      event: control_change
+      path: /vis/master/alpha
     class: SingleAction
   name: Master Alpha
   sources:
@@ -27,7 +42,7 @@ mappings:
 - actions:
     class: StartStopAction
     end: {class: SendOSC, event: release, led: grey, path: '/vis/smilies/{control.n}/stop_emit'}
-    start: {class: SendOSC, event: press, led: yellow, path: '/vis/smilies/{control.n}/start_emit'}
+    start: {class: SendOSC, event: press, led: red, path: '/vis/smilies/{control.n}/start_emit'}
   name: 'Smiley Control #2'
   sources:
   - class: GridButton
@@ -35,4 +50,3 @@ mappings:
 plugins: [send_osc]
 settings:
   send_osc: {target: 'localhost:1234'}
-
