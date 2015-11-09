@@ -38,6 +38,7 @@ class ApcMiniEmu(App):
         self.profile = Profile.load()
 
         App.__init__(self)
+        self.connect_midi(self.profile.settings.get("connect_slave"))
 
     def build(self):
         sm = ScreenManager()

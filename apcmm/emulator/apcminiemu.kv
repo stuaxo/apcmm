@@ -98,7 +98,7 @@
                     title: 'Perform'
                 ActionOverflow:
                 ActionButton:
-                    text: '> %s' % app.midi_port # TODO - load this from config
+                    text: '> %s' % app.portname # TODO - load this from config
                     size_hint: 1, 1
                     on_release: root.toggle_midi_dropdown(self)
                     id: toggle_midi_popup

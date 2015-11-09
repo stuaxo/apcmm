@@ -42,7 +42,7 @@ mappings:
 - actions:
     class: StartStopAction
     end: {class: SendOSC, event: release, led: grey, path: '/vis/entities/{control.n}/stop_emit'}
-    start: {class: SendOSC, event: press, led: red, path: '/vis/entities/{control.n}/start_emit'}
+    start: {class: SendOSC, event: press, led: yellow, path: '/vis/entities/{control.n}/start_emit'}
   name: 'Emit Control #2'
   sources:
   - class: GridButton
@@ -58,3 +58,4 @@ mappings:
 plugins: [send_osc]
 settings:
   send_osc: {target: 'localhost:1234'}
+  connect_slave: APC MINI MIDI 1
