@@ -1,3 +1,4 @@
+from kivy.clock import mainthread
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -9,6 +10,7 @@ class ClipButton(ButtonBehavior, BoxLayout):
         self.data = data
         super(ClipButton, self).__init__()
 
+    @mainthread
     def set_color(self, data):
         """
         :param color: one of the values of the ClipColor enum
@@ -26,6 +28,7 @@ class RoundButton(ButtonBehavior, BoxLayout):
         self.data = data
         self.set_color(data)
 
+    @mainthread
     def set_color(self, data):
         """
         :param color: one of the values in valid_colors enum
