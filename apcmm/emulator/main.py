@@ -61,17 +61,17 @@ class ApcMiniEmu(App):
         if self.midi_port:
             self.midi_port.close()
 
-        #def callback(msg):
-        #    print(msg)
-        #    model.midi.dispatch(msg)
-
         if portname is None:
             self.midi_port = None
             if self.connected_apc is not None:
                 pass  ## send reset
         else:
-            self.midi_port = mido.open_ioport(portname, callback=model.midi.dispatch, autoreset=True)
-            self.connected_apc = self.profile.virtual_apc.connect_slave(self.midi_port)
+            try:
+                self.midi_port = mido.open_ioport(portname, callback=model.midi.dispatch, autoreset=True)
+                self.connected_apc = self.profile.virtual_apc.connect_slave(self.midi_port)
+            except IOError:
+                self.connected_apc = None
+                self.midi_port = None
 
     @property
     def portname(self):
@@ -99,10 +99,10 @@ def main():
         if args.screen not in ["edit", "perform"]:
             raise ValueError("Invalid screen")
 
-    try:
-        app = ApcMiniEmu(first_screen=args.screen)
-        app.run()
-    except Exception as e:
-        print e
-        logger.exception(e)
-        raise e
+    #try:
+    app = ApcMiniEmu(first_screen=args.screen)
+    app.run()
+    #except Exception as e:
+    #    print e
+    #    logger.exception(e)
+    #    raise e

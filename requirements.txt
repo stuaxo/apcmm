@@ -1,5 +1,5 @@
 Cython==0.23
-enum
+enum34
 Kivy==1.9.1
 mido>=1.1.14
 mnd>=0.2.1

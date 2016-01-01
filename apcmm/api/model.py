@@ -49,18 +49,20 @@ class ClipColors(Enum):
     # red_blink = 4
     yellow = 5
     # yellow_blink = 6
-ClipColors.default = ClipColors.grey
+
+    default = 0
 
 class SceneColors(Enum):
     grey = 0
     green = 1
-SceneColors.default = SceneColors.grey
+
+    default = 0
 
 class ControlColors(Enum):
     grey = 0
     red = 1
-ControlColors.default = ControlColors.grey
 
+    default = 0
 
 class GridWidget(object):
     action_fields = []
@@ -91,7 +93,7 @@ class GridButton(GridWidget):
 
     action_fields = ["type", "n", "note", "x", "y", "light_color"]
 
-    def __init__(self, type, n, note, x, y, colors=None):
+    def __init__(self, t, n, note, x, y, colors=None):
         """
         :param type: one of BUTTON_TYPES
         :param n:    number of this type of button
@@ -100,7 +102,7 @@ class GridButton(GridWidget):
         :param y:    y on grid
         """
         GridWidget.__init__(self)
-        self.type = type
+        self.type = t
         self.n = n
         self.note = note
         self.x = x
