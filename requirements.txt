@@ -1,7 +1,10 @@
-mido
-mnd
-pyliblo
-pyyaml
-six
+Cython==0.23
 enum
-
+Kivy==1.9.1
+mido>=1.1.14
+mnd>=0.2.1
+pyliblo>=0.9.2
+PyYAML
+requests
+six
+wheel>=0.26.0
