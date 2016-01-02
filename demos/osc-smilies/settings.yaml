@@ -1,0 +1,61 @@
+mappings:
+- actions:
+    action:
+      class: SendOSC
+      data:
+      - [float, control.value]
+      event: control_change
+      path: /vis/entities/{control.n}/amount
+    class: SingleAction
+  name: 'Entity Amount #1'
+  sources:
+  - class: GridSlider
+    controls:
+      n__in: [0, 1, 2, 3]
+      type: slider
+- actions:
+    action:
+      class: SendOSC
+      data:
+      - [float, control.value]
+      event: control_change
+      path: /vis/entities/{control.n}/alpha
+    class: SingleAction
+  name: 'Entity Alpha #1'
+  sources:
+  - class: GridSlider
+    controls:
+      n__in: [4, 5, 6, 7]
+      type: slider
+- actions:
+    action:
+      class: SendOSC
+      data:
+      - [float, control.value]
+      event: control_change
+      path: /vis/master/alpha
+    class: SingleAction
+  name: Master Alpha
+  sources:
+  - class: GridSlider
+    controls: {n: 8, type: slider}
+- actions:
+    class: StartStopAction
+    end: {class: SendOSC, event: release, led: grey, path: '/vis/entities/{control.n}/stop_emit'}
+    start: {class: SendOSC, event: press, led: yellow, path: '/vis/entities/{control.n}/start_emit'}
+  name: 'Emit Control #2'
+  sources:
+  - class: GridButton
+    controls: {type: clip}
+- actions:
+    class: StartStopAction
+    end: {class: SendOSC, event: release, led: grey, path: '/vis/scene/{control.n}/donothing'}
+    start: {class: SendOSC, event: press, led: green, path: '/vis/scene/{control.n}/start'}
+  name: 'Change Scene'
+  sources:
+  - class: GridButton
+    controls: {type: scene}
+plugins: [send_osc]
+settings:
+  send_osc: {target: 'localhost:1234'}
+  connect_slave: APC MINI MIDI 1
