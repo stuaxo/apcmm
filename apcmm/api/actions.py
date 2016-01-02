@@ -259,14 +259,10 @@ class SendOSC(Action):
             print("No target address for OSC")
 
         if self.led:
-            color_valid = False
-            for color in control.valid_colors:
-                if color.name == self.led:
-                    control.set_color(color)
-                    color_valid = True
-                    break
-            if not color_valid:
-                # TODO - logging
+            try:
+                led_color = control.valid_colors[self.led]
+                control.set_color(led_color)
+            except KeyError:
                 print("Invalid LED color ", self.led)
                 print("  valid colors: " + ", ".join(color.name for color in control.valid_colors))
 

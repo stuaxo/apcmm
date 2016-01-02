@@ -50,19 +50,22 @@ class ClipColors(Enum):
     yellow = 5
     # yellow_blink = 6
 
-    default = 0
+ClipColors.default = ClipColors.grey
+
 
 class SceneColors(Enum):
     grey = 0
     green = 1
 
-    default = 0
+SceneColors.default = SceneColors.grey
+
 
 class ControlColors(Enum):
     grey = 0
     red = 1
 
-    default = 0
+ControlColors.default = ControlColors.grey
+
 
 class GridWidget(object):
     action_fields = []
