@@ -1,0 +1,7 @@
+- Way of loading / saving settings.
+- Finish implementing Gate, Toggle etc
+- Move SendOSC out of actions
+
+Android
+- Get liblo building
+- Work out why it crashes (maybe mido problem?)
