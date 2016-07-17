@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from collections import OrderedDict, defaultdict
+from itertools import chain
 from enum import Enum
 from mnd.dispatch import Dispatcher
 from mnd.handler import Handler
@@ -8,6 +9,7 @@ from six.moves import range
 from six import with_metaclass
 
 from actions import EVENT_PRESS, EVENT_RELEASE, EVENT_LONG_PRESS, EVENT_CHANGE, SingleAction, StartStopAction
+from kivy import Logger
 
 import mido
 
@@ -16,7 +18,7 @@ SEND_MIDI = "APC MINI MIDI 1"
 
 midi = Dispatcher()
 
-EVENT_SOURCES = {}  # ca;
+EVENT_SOURCES = {}
 
 def register_source(klass):
     """
@@ -51,6 +53,7 @@ class ClipColors(Enum):
     # yellow_blink = 6
 
 ClipColors.default = ClipColors.grey
+ClipColors.light = ClipColors.green
 
 
 class SceneColors(Enum):
@@ -58,6 +61,7 @@ class SceneColors(Enum):
     green = 1
 
 SceneColors.default = SceneColors.grey
+SceneColors.light = SceneColors.green
 
 
 class ControlColors(Enum):
@@ -65,6 +69,7 @@ class ControlColors(Enum):
     red = 1
 
 ControlColors.default = ControlColors.grey
+ControlColors.light = ControlColors.red
 
 
 class GridWidget(object):
@@ -177,6 +182,13 @@ class GridButton(GridWidget):
         self.light_color = color
         for f in self.color_change_cb:
             f(self)
+
+    def light_on(self, color=None):
+        if self.valid_colors is None:
+            return # shift button has no light
+        if color is None:
+            color = self.valid_colors.light
+        self.set_color(color)
 
     @property
     def name(self):
@@ -359,6 +371,30 @@ class APCMiniModel(with_metaclass(Handler)):
 
     def add_observer(self, o):
         self.observers.append(o)
+
+    def mapped_widgets(self, mapping):
+        Logger.info("matching emitters: %s" % mapping)
+
+        result = set()
+
+        for source in mapping.sources:
+            filtered_emitters = set(self.grid.values())
+
+            for k, v in source.items():
+                if k == 'class':
+                    for emitter in list(filtered_emitters):
+                        if emitter.__class__.__name__ != v:
+                            filtered_emitters.remove(emitter)
+                elif k == 'controls':
+                    for emitter in list(filtered_emitters):
+                        for field_k, field_v in source['controls'].items():
+                            emitter_v = getattr(emitter, field_k, None)
+                            if emitter_v != field_v and emitter_v != None:
+                                filtered_emitters.remove(emitter)
+            result.update(filtered_emitters)
+
+        Logger.info("result: %s" % list(result))
+        return result
 
     def dispatch_event(self, control, event, data):
         for mapping in self.mappings:

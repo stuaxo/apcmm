@@ -267,9 +267,14 @@ class ActionSideBar(Accordion):
 
     def open_group(self, item, collapse):
         if collapse is False:
-            print item.title
+            Logger.info("open group %s" % (item.title))
+
+            # Flash all buttons in group
+
             ## TODO
             ## self.open_mapping
+
+            #import ipdb; ipdb.set_trace()
 
     def update_mapping_name(self, mapping, name):
         """
@@ -287,6 +292,15 @@ class ActionSideBar(Accordion):
         mapping = self.mapping_buttons[button]
         self.current_mapping = mapping
         self.action_editor.mapping = mapping
+
+        Logger.info("Select mapping %s" % mapping)
+
+        mapped_widgets = self.model.mapped_widgets(mapping)
+        for widget in mapped_widgets:
+            # TODO Flash buttons in mapping
+            if hasattr(widget, "set_color"):
+                Logger.info(widget.name)
+                widget.light_on()
 
 
 class EditScreen(Screen):
@@ -312,9 +326,9 @@ class EditScreen(Screen):
         p.open()
 
     def add_action(self, action):
-        print("add action %s" % action)
-        print(self.model)
-        #model.add_action(action)
+        Logger.info("add action %s" % action)
+        Logger.info("%s" % self.model)
+        #self.model.add_action(action)
 
     def change_midi_device(self,  portname):
         app = App.get_running_app()
