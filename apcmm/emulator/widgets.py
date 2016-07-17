@@ -13,6 +13,8 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.uix.slider import Slider
 
+from kivy.logger import Logger
+
 import apcmm.api as api
 from apcmm.api.actions import EVENT_PRESS, EVENT_CHANGE, EVENT_RELEASE
 from apcmm.api.model import SLIDER, CLIP_LAUNCH, SCENE_LAUNCH, CONTROL, BUTTON_TYPES
@@ -84,9 +86,10 @@ class PerformanceScreen(Screen):
         p.open()
 
     def change_midi_device(self,  portname):
+        Logger.info("Change Midi port to: %s" % portname)
         app = App.get_running_app()
         app.connect_midi(portname)
-        self.ids['toggle_midi_popup'].text = "> %s" % portname
+        self.ids['toggle_midi_popup'].text = "> %s" % app.portname
 
 
 # Bottom Bar components
@@ -315,6 +318,7 @@ class EditScreen(Screen):
 
     def change_midi_device(self,  portname):
         app = App.get_running_app()
+        Logger.info("Change midi device: %s" % portname)
         try:
             app.connect_midi(portname)
         except Exception as e:

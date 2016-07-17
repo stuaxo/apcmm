@@ -336,7 +336,10 @@ class APCMiniModel(with_metaclass(Handler)):
                             if name == 'light_color':
                                 msg = this_w.midi_lightcolor()
                                 print("send ", msg)
-                                self.slave_port.send(msg)
+                                try:
+                                    self.slave_port.send(msg)
+                                except ValueError as e:
+                                    self.slave_port = None
 
     def add_grid_button(self, w):
         """
