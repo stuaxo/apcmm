@@ -5,6 +5,12 @@ APC Mini API and emulator.
 
 (Fairly unfinished and experimental).
 
+[![APCMM In action with vis](https://img.youtube.com/vi/Mdz5ESzms3k/hqdefault.jpg
+)](https://www.youtube.com/watch?v=Mdz5ESzms3k&feature=youtu.be)
+
+
+
+
 Install
 =======
 
